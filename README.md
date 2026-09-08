@@ -1,5 +1,8 @@
 # TEMO Efficiency
 
+[![GitHub stars](https://img.shields.io/github/stars/luaysameer/temo-efficiency?style=social)](https://github.com/luaysameer/temo-efficiency/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **Smart model routing + micro-checkpoint execution for GPT/Codex-style workflows.**
 
 > Use the smallest capable model. Preserve the acceptance criteria. Escalate only when evidence says you need to.
@@ -178,6 +181,10 @@ TEMO Efficiency does not circumvent platform limits, billing, plan restrictions,
 ## Origin
 
 This workflow was developed through iterative real-project use under the **TEMO × AREEN** collaboration method: split the work, choose the capability the checkpoint actually deserves, verify precisely, and preserve what already passed.
+
+## Support the project
+
+If TEMO Efficiency saves you time or AI usage, **star the repository** so more builders can discover it. Real-world routing examples and improvements are welcome.
 
 ## Contributing
 
