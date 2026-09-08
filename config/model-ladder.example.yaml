@@ -1,0 +1,39 @@
+# TEMO Efficiency model ladder
+# Map these profiles to models that actually exist in your environment.
+# Do not invent model names. Update this file when your provider/model catalog changes.
+
+profiles:
+  fast:
+    model: "SET_YOUR_FAST_MODEL"
+    default_effort: "low"
+    purpose: "deterministic edits, extraction, formatting, narrow checks"
+
+  balanced:
+    model: "SET_YOUR_BALANCED_MODEL"
+    default_effort: "medium"
+    purpose: "focused implementation, normal debugging, targeted integration"
+
+  deep:
+    model: "SET_YOUR_DEEP_MODEL"
+    default_effort: "medium"
+    allow_high_effort: true
+    purpose: "architecture, difficult regressions, coupled systems"
+
+  max:
+    model: "SET_YOUR_MAX_MODEL"
+    default_effort: "high"
+    purpose: "exceptional complexity/risk only"
+
+routing:
+  score_0_2: "fast"
+  score_3_5: "balanced"
+  score_6_8: "deep"
+  score_9_10: "max"
+
+policy:
+  preserve_acceptance_criteria: true
+  repeat_verified_work: false
+  full_regression_by_default: false
+  deploy_by_default: false
+  boost_by_default: false
+  escalate_one_level_at_a_time: true
