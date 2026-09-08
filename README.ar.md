@@ -1,117 +1,128 @@
 # TEMO Efficiency — الشرح العربي
 
-**توجيه ذكي للموديلات + تقسيم العمل إلى Micro-Checkpoints لتقليل الهدر في Credits/Tokens بدون تقليل جودة النتيجة.**
+[![GitHub stars](https://img.shields.io/github/stars/luaysameer/temo-efficiency?style=social)](https://github.com/luaysameer/temo-efficiency/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-هذه الفكرة خرجت من أسلوب **TEMO × AREEN** في المشاريع الطويلة: بدل ما نرمي كل مهمة على أقوى موديل ونصرف استخدام عالي، نقيس صعوبة المهمة ومخاطرها ونختار الموديل الذي تستحقه فعلاً.
+**TEMO Efficiency** هي مهارة لتوجيه الموديلات وتنفيذ العمل عبر نقاط تحقق صغيرة (Micro-Checkpoints) في تدفقات GPT/Codex. تعالج هدر الموديل الأقوى، والسياق المتكرر، والاختبارات الواسعة غير الضرورية، من دون تخفيض معايير القبول.
 
-## الفكرة باختصار
+نشأت من أسلوب **TEMO × AREEN**: قِس صعوبة كل مهمة ومخاطرها، استخدم أقل قدرة تكفيها، احتفظ بما اجتاز الاختبار، وصعّد فقط عند وجود دليل.
 
-المهمة الصغيرة لا تحتاج نفس مستوى الموديل الذي يحتاجه Debug معقد أو تعديل معماري حساس.
+> Use the smallest capable model. Preserve the acceptance criteria. Escalate only when evidence says you need to.
 
-TEMO Efficiency يقيس كل Checkpoint حسب:
+إذا كانت هذه الفكرة مفيدة لعملك، **[ضع Star للمشروع](https://github.com/luaysameer/temo-efficiency)** وشارك نتيجة تجربة حقيقية.
 
-- التعقيد
-- المخاطرة
-- حجم التغيير
-- صعوبة التحقق
-- مقدار الغموض
+## البدء السريع
 
-ثم يختار واحدًا من أربعة Profiles:
+1. حمّل [`SKILL.md`](SKILL.md) في مجلد المهارات لدى الـAgent، أو الصقه ضمن تعليمات المشروع في تدفق GPT/Codex.
+2. اربط FAST وBALANCED وDEEP وMAX بمستويات القدرات المتاحة لديك؛ يمكن البدء من [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml).
+3. أرسل المهمة مع التعليمات الجاهزة التالية:
 
-| الدرجة | Profile | الجهد المعتاد | أمثلة |
+```text
+Use the TEMO Efficiency rules in SKILL.md for this task.
+Score the current task, choose FAST / BALANCED / DEEP / MAX, and explain the route.
+Create and execute one narrow micro-checkpoint. Preserve existing acceptance criteria and previous PASS states.
+Run verification proportional to the change surface, add a regression guard when practical, and escalate only when diagnostics justify it.
+Stop at the checkpoint boundary and report the evidence.
+
+Task: <describe the task>
+Acceptance criteria: <state the required result>
+Protected / do not change: <state known PASS areas or scope limits>
+```
+
+توجد حالات عملية كاملة في [`examples/EXAMPLES.md`](examples/EXAMPLES.md).
+
+## عرض خلال 30 ثانية
+
+### قبل TEMO Efficiency
+
+```text
+- إرسال كل مهمة إلى أقوى موديل.
+- توسيع النطاق ليشمل المشروع كله.
+- إعادة جميع الاختبارات بعد كل محاولة.
+- تكرار الـDebug في أجزاء لا تخص العطل.
+- استهلاك Tokens/Credits إضافية بلا دليل أن التوسّع حسّن القبول.
+```
+
+### بعد TEMO Efficiency
+
+```text
+1. قياس التعقيد والمخاطرة والنطاق وصعوبة التحقق والغموض.
+2. اختيار FAST / BALANCED / DEEP / MAX.
+3. إنشاء Micro-Checkpoint ضيقة واحدة.
+4. تنفيذ تحقق مستهدف يناسب سطح التغيير.
+5. إضافة Regression Guard للعقد الذي انكسر عندما يكون ذلك عمليًا.
+6. حماية حالة PASS السابقة.
+7. التصعيد مستوى واحد فقط عندما تبرره نتائج التشخيص.
+```
+
+معايير القبول لا تتغير؛ الذي ينخفض هو العمل المتكرر وغير الضروري.
+
+## نظرة عامة على التوجيه
+
+يُقيَّم كل بُعد من 0 إلى 2: التعقيد، المخاطرة، النطاق، عبء التحقق، والغموض. المجموع يحدد Profile عامًّا لا اسم موديل ثابتًا.
+
+| الدرجة | Profile | مناسب لـ | مثال |
 |---:|---|---|---|
-| 0-2 | FAST | Low | تنسيق، استخراج، تعديل صغير، فحص حتمي |
-| 3-5 | BALANCED | Medium | برمجة مركزة، Debug طبيعي، Integration محدود |
-| 6-8 | DEEP | Medium/High | Architecture، Regression صعب، أنظمة مترابطة |
-| 9-10 | MAX | High | حالات استثنائية عالية التعقيد أو الخطورة |
+| 0–2 | **FAST** | عمل حتمي صغير وسهل التحقق | تعديل نص ثابت، إعادة تسمية محدودة، فحص Syntax |
+| 3–5 | **BALANCED** | تنفيذ مركز وDebug اعتيادي بهدف معروف | إصلاح UI محلي، تحقق API محدود، Targeted Tests |
+| 6–8 | **DEEP** | Regression صعب أو عدة مكونات مترابطة أو قرار معماري | تتبع عطل بين Client وService وCache |
+| 9–10 | **MAX** | تعقيد استثنائي أو خطر عالٍ على الأمن أو البيانات أو الإنتاج | مراجعة حد صلاحيات أو خطة استعادة واسعة الأثر |
 
-أسماء الموديلات نفسها تتغير مع الوقت، لذلك الـSkill لا تعتمد على اسم موديل ثابت. أنت تربط FAST/BALANCED/DEEP/MAX بالموديلات المتوفرة عندك.
+اربط كل Profile بأصغر موديل في بيئتك يستطيع إنجاز العمل بثقة. يكون التصعيد تدريجيًا: `FAST → BALANCED → DEEP → MAX`، مع الاحتفاظ بالتشخيص والعمل المنجز.
 
-## شلون يوفر استخدام؟
+## كيف يحافظ على الجودة؟
 
-مو عن طريق تقليل الجودة. التوفير يجي من منع الهدر:
+- لا تتغير معايير القبول لتوفير الاستخدام.
+- كل Micro-Checkpoint لها هدف واحد وحد توقف واضح.
+- الاختبارات المستهدفة مناسبة للتغيير الضيق؛ أما العقود المشتركة والمخططات والتوجيه وحدود الأمن وأساس النشر فتتطلب Regression أوسع.
+- نضيف أصغر Regression Guard عملي بعد الإصلاحات المهمة.
+- `IMPLEMENTED` لا تساوي `VERIFIED`؛ لا يوجد تحقق بلا دليل القبول المطلوب.
+- لا نعيد العمل الذي اجتاز الاختبار إلا إذا تغير الكود أو الاعتماد أو البيئة أو المتطلب المرتبط به.
 
-1. ما تستخدم أقوى موديل لمهمة بسيطة.
-2. ما تعيد شغل صار Verified بدون سبب.
-3. ما ترسل تاريخ مشروع ضخم لمشكلة صغيرة.
-4. ما تشغل Full Regression على تغيير محلي إذا ماكو داعي.
-5. من تصلح Regression مهم، تضيف Test دائم حتى ما تدفع مرة ثانية لنفس المشكلة.
-6. كل Checkpoint يوقف عند حدّه وما يفتح Feature ثانية من نفسه.
+## Benchmark
 
-## الفرق بين IMPLEMENTED و VERIFIED
+هدف إطار القياس هو معرفة هل تقلل TEMO Efficiency **العمل القابل للتجنب من دون خفض جودة القبول**. يسجل نوع التوجيه، وعدد مرات التصعيد، والعمل والاختبارات المتكررة، ومحاولات التنفيذ، ونتيجة القبول، والاستهلاك التقريبي عندما يمكن قياسه، والزمن حتى القبول.
 
-مهم جدًا:
+لا توجد بيانات منشورة مقاسة حتى الآن، لذلك الحالة الحالية هي: **Data collection pending.** استخدم القالب القابل لإعادة الاستخدام في [`docs/BENCHMARK.md`](docs/BENCHMARK.md).
 
-- **IMPLEMENTED:** الكود أو التعديل موجود واختباراته المطلوبة نجحت.
-- **VERIFIED:** عندك دليل القبول المطلوب، مثل اختبار حقيقي على Browser/Device/Production عندما تكون هذه هي معايير النجاح.
+## شكل Micro-Checkpoint
 
-ما نسمي العمل 100% لمجرد أن Unit Tests نجحت إذا المطلوب كان تشغيل حقيقي.
-
-## أمر التنفيذ المزدوج
-
-حتى الـAgent ما يستلم الخطة ويرد: «شنو تريد مني أسوي؟»، نضع هذين الأمرين قبل الـCheckpoint:
+يجب أن تحدد الأداة/البيئة، والـProfile، والجهد، والهدف، وحالة PASS المحمية، والتحقق، وشرط النجاح، وشرط التوقف، وإذن النشر، وشكل التقرير. استخدم [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md)، وأضف [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) فقط عندما يكون المطلوب تنفيذًا فعليًا.
 
 ```text
-EXECUTE THIS CHECKPOINT NOW. START IMPLEMENTATION IMMEDIATELY. DO NOT ASK ME WHAT TO DO.
+Tool/environment: <agent and environment>
+Model/Profile: <FAST | BALANCED | DEEP | MAX>
+Effort: <Low | Medium | High>
+Deploy: NO unless explicitly authorized
 
-THIS IS AN IMPLEMENTATION COMMAND, NOT A REVIEW REQUEST. COMPLETE THE CHECKPOINT, RUN THE REQUIRED TESTS, DEPLOY IF ALLOWED AND PASSING, THEN RETURN THE REQUESTED FINAL REPORT. BEGIN NOW.
+Objective: <one bounded result>
+Protected / do not repeat: <known PASS state>
+Verification: <targeted evidence and protected tests>
+Escalation condition: <specific diagnostic threshold>
+Success condition: <acceptance evidence>
+Stop condition: report and do not expand scope
 ```
-
-هذا الأمر يُستخدم فقط إذا المطلوب فعلًا هو التنفيذ.
-
-## قاعدة Micro-Checkpoint
-
-كل مرحلة تحتوي على:
-
-- Tool
-- Model/Profile
-- Effort
-- مؤشر استهلاك إذا متوفر
-- Boost/Speed إذا متوفر
-- Deploy YES/NO
-- Objective واحد واضح
-- شغل سابق ممنوع إعادته أو تخريبه
-- Success condition
-- Stop condition
-- شكل التقرير النهائي
-
-## قاعدة التصعيد
-
-ما نقفز إلى أقوى موديل مباشرة.
-
-```text
-FAST -> BALANCED -> DEEP -> MAX
-```
-
-نصعّد فقط إذا ظهر دليل، مثل:
-
-- السبب الحقيقي بعده غامض
-- أكثر من System مترابط بالمشكلة
-- Regression عدّى الاختبارات الموجودة
-- قرار Architecture أو Migration
-- خطر على Security/Data/Production
-- الموديل الحالي فشل في نفس Acceptance Criteria بدون تغيير
-
-وعند التصعيد ما نعيد من الصفر؛ نحمل ويانا التشخيص والنتائج الموجودة.
 
 ## Regression Lock
 
-إذا أصلحنا مشكلة مهمة، نحولها إلى Contract محمي:
-
 ```text
-تشخيص -> إصلاح -> Targeted Test -> Regression Guard -> Deploy -> قبول حقيقي -> Protect PASS
+تشخيص → إصلاح → Targeted Test → Regression Guard → نشر إذا كان مسموحًا → قبول حقيقي → Protect PASS
 ```
 
-الفكرة الأساسية: **لا ندفع Credits مرتين لنفس الخطأ.**
+الهدف هو حماية العقد الذي انكسر ومنع دفع تكلفة المشكلة نفسها مرة ثانية، مع إبقاء التحقق متناسبًا مع سطح التغيير.
 
-## ملاحظة مهمة
+## المستندات والمشاركة
 
-هذه المهارة لا تتجاوز حدود الاشتراك أو الفوترة أو Rate Limits، وما تضمن نسبة توفير ثابتة. هدفها تقليل الاستخدام غير الضروري عن طريق اختيار قدرات مناسبة ومنع إعادة الشغل.
+- [`SKILL.md`](SKILL.md) — القواعد الأساسية الملزمة
+- [`examples/EXAMPLES.md`](examples/EXAMPLES.md) — أربع حالات توجيه عملية
+- [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — بروتوكول القياس وقالب البيانات
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — الأساس الحالي والخطط المرشحة
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — دليل المساهمة
+- [`README.md`](README.md) — النسخة الإنجليزية
 
-## الاستخدام
-
-اقرأ `SKILL.md` باعتباره التعليمات الأساسية. استخدم `templates/CHECKPOINT.md` لكتابة Checkpoint، و`templates/EXECUTION_HEADER.md` قبل أي خطة تريد من الـAgent تنفيذها مباشرة.
+هذه المهارة لا تتجاوز الحصص أو الفوترة أو Rate Limits أو ضوابط الأمان، ولا تعد بنسبة توفير ثابتة. النتيجة تعتمد على نوع العمل، وقدرات الموديلات وأسعارها، وحجم السياق، ومتطلبات التحقق، وسلوك الـAgent.
 
 ## الترخيص
 
 MIT — استخدمها وعدلها وطورها.
+
