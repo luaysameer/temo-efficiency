@@ -154,6 +154,17 @@ export default {
         }, 200);
       }
 
+      const maxDaily = Math.max(1, Number(env.MAX_DAILY_ISSUES || 100));
+      const todayCount = await countTodayGatewayIssues(env);
+      if (todayCount >= maxDaily) {
+        return json({
+          ok: false,
+          error: "daily_issue_cap_reached",
+          current: todayCount,
+          limit: maxDaily
+        }, 429, { "Retry-After": "3600" });
+      }
+
       const title = buildIssueTitle(clean, issueToken);
       const body = buildIssueBody(clean, issueToken, env);
       const issue = await createIssue(title, body, env);
@@ -235,7 +246,7 @@ function optionalString(payload, key, max, errors) {
 }
 
 function sanitizePayload(payload) {
-  const clean = {
+  return {
     schemaVersion: "1.0",
     source: payload.source,
     feedbackMode: payload.feedbackMode,
@@ -256,8 +267,6 @@ function sanitizePayload(payload) {
     likelyCause: cleanText(payload.likelyCause || "", LIMITS.likelyCause),
     suggestedImprovement: cleanText(payload.suggestedImprovement || "", LIMITS.suggestedImprovement)
   };
-
-  return clean;
 }
 
 function cleanText(value, max) {
@@ -314,6 +323,19 @@ async function findExistingIssue(issueToken, env) {
   }
   const data = await response.json();
   return data.items?.[0] || null;
+}
+
+async function countTodayGatewayIssues(env) {
+  const today = new Date().toISOString().slice(0, 10);
+  const query = `repo:${env.GITHUB_OWNER}/${env.GITHUB_REPO} is:issue in:title TFG- created:>=${today}`;
+  const response = await githubFetch(`/search/issues?q=${encodeURIComponent(query)}&per_page=1`, env);
+  if (!response.ok) {
+    const details = await response.text();
+    console.error("GitHub daily issue count failed", response.status, details.slice(0, 500));
+    throw new Error("github_daily_count_failed");
+  }
+  const data = await response.json();
+  return Number(data.total_count || 0);
 }
 
 async function createIssue(title, body, env) {
