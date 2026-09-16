@@ -1,8 +1,8 @@
 # TEMO Feedback Gateway Status
 
-Current state: **DEPLOYED — LIVE_ACCEPTANCE_PASS — NOTIFICATION_PENDING**
+Current state: **REGRESSION_FOUND — DEDUPE_FIX_DEPLOYING — RETEST_REQUIRED**
 
-Gateway version: `0.1.0`
+Gateway version: `0.1.1`
 Production URL: `https://temo-feedback-gateway.cpu2turn.workers.dev`
 Target Worker name: `temo-feedback-gateway`
 Target repository: `luaysameer/temo-efficiency`
@@ -11,58 +11,52 @@ Target repository: `luaysameer/temo-efficiency`
 
 - Worker deployment succeeded from `main`.
 - Production workers.dev URL is enabled.
-- `GET /api/health` returns `ok: true` and `ready: true`.
+- `GET /api/health` returned `ok: true` and `ready: true` on gateway `0.1.0`.
 - Cloudflare secret `GITHUB_TOKEN` is configured.
 - Browser acceptance console is live at `/test.html`.
-- `GET /v1/schema` returns schema `1.0` and the expected privacy contract.
-- A valid structured browser test created GitHub Issue `#3` with fingerprint `TFG-DB56C38CCCA1`.
-- Repeating the identical payload returned the same Issue with `duplicate: true` and HTTP 200; no second Issue was created.
-- An unsupported `rawConversation` field was rejected with HTTP 400 and `unsupported_field:rawConversation`.
-- `consent: false` was rejected with HTTP 400 and `consent_must_be_true`.
-- Issue `#3` was inspected directly and contains only structured feedback fields; no raw conversation, code, logs, files, screenshots, email, or token value is present.
-- Source review confirms the GitHub credential is referenced only through the runtime secret binding `env.GITHUB_TOKEN`; the token value is not stored in repository source or returned by the gateway responses.
+- `GET /v1/schema` returned schema `1.0` and the expected privacy contract.
+- Unsupported `rawConversation` was rejected with HTTP 400.
+- `consent: false` was rejected with HTTP 400.
+- Issue bodies contain only structured feedback fields; no raw conversation, code, logs, files, screenshots, email, or token value was present.
+- Source review confirms the GitHub credential is referenced only through runtime secret binding `env.GITHUB_TOKEN`.
 
-## Implemented
+## Regression discovered from acceptance screenshots
 
-- Structured JSON feedback endpoint.
-- Consent required.
-- Strict allowlist schema; arbitrary fields rejected.
-- Raw conversation / prompt / code / logs / files / screenshots / email are not accepted.
-- Best-effort secret redaction.
-- Cloudflare client rate limit: 3/minute.
-- Cloudflare gateway rate limit: 12/minute per Cloudflare location.
-- GitHub-backed daily Issue cap: 100/day by default.
-- Deterministic duplicate fingerprint and existing-Issue reuse.
-- GitHub fine-grained token kept as Cloudflare `GITHUB_TOKEN` secret only.
-- Health endpoint.
-- Machine-readable schema endpoint.
-- Browser acceptance console.
-- Example feedback payload.
-- GitHub Actions validation workflow added.
+The first live acceptance run created **two GitHub Issues with the same fingerprint**:
 
-## Current checkpoint
+- `#2` — fingerprint `TFG-DB56C38CCCA1` — created `2026-09-16T09:07:03Z`
+- `#3` — fingerprint `TFG-DB56C38CCCA1` — created `2026-09-16T09:07:05Z`
 
-The production gateway has passed the live API acceptance checks. One final operational acceptance check remains: confirm that the maintainer receives the expected GitHub notification according to repository notification settings.
+This exposed an indexing race in the original duplicate check: it relied on GitHub Search, which can lag immediately after Issue creation. Issue `#3` has been closed with state reason `duplicate`; Issue `#2` remains the canonical first test Issue.
+
+## Dedupe fix in gateway 0.1.1
+
+The duplicate guard now uses layered protection:
+
+1. Cloudflare cache lookup for a recently created fingerprint.
+2. Direct GitHub repository Issue listing for the newest 100 Issues before falling back to GitHub Search.
+3. A dedicated per-fingerprint Cloudflare rate-limit lock (`FINGERPRINT_RATE_LIMITER`, namespace `9515003`, limit 1 / 10 seconds).
+4. On an in-flight duplicate, the Worker waits and rechecks for the canonical Issue instead of creating another Issue.
+5. A final direct recheck runs immediately before Issue creation.
+6. The browser test console now generates a fresh test-run UUID on every page load so a retest cannot accidentally reuse the old acceptance fingerprint.
+
+## Retest required
+
+After Cloudflare deploys `0.1.1` from `main`:
+
+1. `GET /api/health` must report version `0.1.1`, `ok: true`, `ready: true`.
+2. Reload `/test.html` to obtain a new Run UUID.
+3. Press **Create test Issue** once — expect HTTP 201 and one new Issue.
+4. Immediately press **Duplicate test** — expect HTTP 200, `duplicate: true`, and the **same issueNumber / issueUrl**.
+5. Confirm the repository contains only one Issue for that new fingerprint.
+6. Repeat privacy and consent rejection tests if desired; prior checks already PASS.
+7. Confirm maintainer notification behavior.
 
 ## Not yet ACTIVE
 
-Do not add the production gateway URL to `SKILL.md` or `TEMO_PORTABLE.md` until the notification check also passes.
+Do not publish the production gateway URL into `SKILL.md` or `TEMO_PORTABLE.md` until the 0.1.1 dedupe retest passes.
 
-## Activation acceptance checks
-
-1. Worker deploy succeeds. — PASS
-2. `GET /api/health` returns `ok: true` and `ready: true`. — PASS
-3. Browser acceptance console `/test.html` renders. — PASS
-4. `GET /v1/schema` returns schema `1.0`. — PASS
-5. Valid test payload creates exactly one GitHub Issue. — PASS (`#3`)
-6. Repeating the same payload returns the existing Issue (`duplicate: true`). — PASS
-7. `rawConversation` is rejected with HTTP 400. — PASS
-8. `consent: false` is rejected with HTTP 400. — PASS
-9. GitHub token is not present in repository source, gateway responses, or Issue body; runtime code does not log the token value. — PASS
-10. Created Issue contains only structured/redacted feedback. — PASS
-11. Maintainer receives the expected GitHub notification according to repository notification settings. — PENDING USER CONFIRMATION
-
-After check 11 passes, update this file to:
+After the retest passes, set:
 
 `ACTIVE — LOCKED_PASS`
 
