@@ -2,8 +2,8 @@
 
 Canonical repository: `luaysameer/temo-efficiency`
 
-Current skill version: **1.4.0**
-Current portable contract: **1.2**
+Current skill version: **1.5.0**
+Current portable contract: **1.3**
 
 ## Canonical entrypoints
 
@@ -16,21 +16,28 @@ Current portable contract: **1.2**
 - Execution choice: `templates/EXECUTION_CHOICE.md`
 - Feedback loop: `docs/FEEDBACK_LOOP.md`
 - Cross-device test: `docs/CROSS_DEVICE_TEST.md`
+- Contribution guide: `CONTRIBUTING.md`
 
 ## Session update rule
 
 When TEMO Efficiency starts in a new session and the canonical repository is reachable:
 
 1. Read this manifest once.
-2. Compare the loaded skill/portable version with the current manifest.
-3. If the loaded copy is older, load the current canonical `SKILL.md` or current `TEMO_PORTABLE.md` before routing the task.
+2. Compare the loaded skill/portable version with this manifest.
+3. If the loaded copy is older, load the current canonical `SKILL.md` or current `TEMO_PORTABLE.md` before routing the first task.
 4. Do not repeatedly check again during the same session unless the user explicitly asks to refresh.
 5. Preserve the current task, provider catalog, and PASS/VERIFIED work while refreshing rules.
 
 If the repository is unreachable, continue with the loaded copy and state that the latest version could not be checked. Do not block the user's task only because an update check failed.
 
-## Privacy and control
+## Update philosophy
 
-TEMO Efficiency does not silently upload conversation content, screenshots, prompts, logs, or telemetry to this repository.
+TEMO Efficiency can refresh its behavior from the canonical repository when access exists.
 
-Feedback is opt-in. The agent may prepare a compact feedback report when a meaningful routing, catalog-discovery, portability, or verification issue is observed, but the user decides whether to submit it.
+It does not silently modify the canonical repository from arbitrary user sessions. Improvements enter through reviewed maintainer changes, GitHub Issues, or Pull Requests.
+
+## Privacy and feedback
+
+TEMO Efficiency does not silently upload conversation content, screenshots, prompts, logs, code, provider catalogs, account details, or telemetry.
+
+Feedback is opt-in. The agent may prepare a compact feedback candidate when a meaningful routing, catalog-discovery, portability, verification, regression, or documentation signal is observed, but the user decides whether to submit it.
