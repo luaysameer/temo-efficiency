@@ -2,47 +2,49 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/luaysameer/temo-efficiency?style=social)](https://github.com/luaysameer/temo-efficiency/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![TEMO Efficiency](https://img.shields.io/badge/TEMO%20Efficiency-v1.5.0-blue.svg)](TEMO_LATEST.md)
 
 **Provider-aware model + reasoning-level routing for AI execution workflows.**
 
-TEMO Efficiency helps an AI decide **which tool, which model, and which reasoning/effort level should be used before execution**, instead of always using the strongest model or leaving the user to guess.
-
-It also splits work into narrow micro-checkpoints, protects VERIFIED/PASS work, and escalates only when evidence shows that the current checkpoint actually needs more capability.
+TEMO Efficiency helps an AI decide **which tool, which model, and which reasoning/effort level to use before execution**. It avoids using the strongest model by default, prevents repeated verified work, and escalates only when evidence shows that the current checkpoint needs more capability.
 
 > Use the smallest capable model. Preserve the acceptance criteria. Escalate only when evidence says you need to.
 
-## What happens when you use this skill?
+**[العربية](README.ar.md)**
 
-The intended behavior is:
+---
+
+## What TEMO Efficiency does
 
 ```text
 Load TEMO Efficiency
-→ detect/confirm the AI provider or tool
-→ discover the real available models + reasoning levels
-→ build/reuse FAST / BALANCED / DEEP / MAX mapping
-→ score the current task checkpoint
+→ refresh the current canonical rules when possible
+→ identify/confirm the AI provider/tool
+→ verify the user's real selectable models + reasoning levels
+→ ask for screenshots/list only when the catalog is not visible
+→ build/reuse FAST / BALANCED / DEEP / MAX
+→ score the current checkpoint
 → choose the exact model + level
 → SHOW THE CHOICE BEFORE EXECUTION
-→ execute one bounded checkpoint
+→ execute one bounded micro-checkpoint
 → verify the result
-→ protect PASS/VERIFIED work
-→ escalate one step only if diagnostics justify it
+→ protect PASS / VERIFIED work
+→ escalate one step only when evidence justifies it
+→ optionally prepare evidence-based feedback
 ```
 
-TEMO Efficiency is not just a prompt saying “use fewer tokens.” It is a reusable **execution behavior contract**.
+TEMO is an **execution behavior contract**, not just a prompt that says “use fewer tokens.”
 
-See [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md).
+---
 
 ## The user sees the model + level before every command
-
-Before any executable command, the AI should show something equivalent to:
 
 ```text
 EXECUTION CHOICE
 Tool / Environment: Codex Local
-Model: <exact real model from the active catalog>
+Model: <exact verified model>
 Profile: FAST
-Level / Effort: <exact real level>
+Level / Effort: <exact verified level>
 Boost / Speed: OFF or Not exposed
 Consumption: Low or Not exposed
 Deploy: NO
@@ -51,21 +53,19 @@ Reason: The current checkpoint is deterministic and narrow.
 Then copy and execute the command below.
 ```
 
-If TEMO already knows the model catalog, it chooses for the user. The user should not have to guess.
+When TEMO has enough verified information, **it chooses for the user**. The user should not have to guess which model or level to select.
 
-If the task becomes harder later, TEMO shows a new execution choice and escalates only one step:
+Escalation is only:
 
 ```text
 FAST → BALANCED → DEEP → MAX
 ```
 
-Previously verified work stays protected.
+---
 
-## Works with different AI providers
+## Works across AI providers
 
-TEMO Efficiency is provider-aware.
-
-It can be used with environments such as:
+TEMO can be used with:
 
 - ChatGPT / OpenAI
 - Codex
@@ -77,136 +77,127 @@ It can be used with environments such as:
 - local models
 - other AI tools
 
-### If the AI already knows its current model catalog
+TEMO does not assume that two users on the same provider have the same model catalog. Free/paid/professional tiers, experiments, apps, regions, and product surfaces may expose different options.
 
-Use the real current models and reasoning/effort controls directly.
+### If the catalog is visible
 
-Do not ask the user to repeat information the environment already exposes.
+Use the real current model + level controls directly.
 
-### If the model catalog is not visible
+### If the catalog is not visible
 
-TEMO asks once for either:
-
-- one screenshot of the model + reasoning/level picker, or
-- a pasted list of the exact models and levels available.
-
-It then builds a session-local ladder:
+TEMO asks for the smallest evidence needed:
 
 ```text
-FAST      → smallest capable model + lowest reliable level
-BALANCED  → normal/default coding-analysis model + medium/default level
-DEEP      → stronger reasoning/coding model + medium/high level
-MAX       → strongest available model + highest justified level
+Send screenshots of:
+1) the expanded model picker,
+2) the expanded reasoning/level/thinking picker if separate,
+3) any boost/speed/mode selector if present.
+
+If screenshots are inconvenient, paste the exact visible labels instead.
 ```
 
-That mapping is reused during the session. TEMO should not keep asking for the same model list.
+If the AI/tool itself is unclear, TEMO may ask for one screenshot of the app/site header or settings page.
 
-TEMO never invents a model name, reasoning level, boost mode, or provider capability.
+TEMO never builds a full ladder from memory, provider-family assumptions, or plan/tier assumptions.
 
-See [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md).
+See [`templates/CATALOG_CONFIDENCE_GATE.md`](templates/CATALOG_CONFIDENCE_GATE.md).
 
-## ChatGPT / OpenAI / Codex
+---
 
-For ChatGPT/OpenAI/Codex, TEMO uses the **current** model and reasoning controls exposed by the active environment when they are available.
+## Auto-refresh: how TEMO stays current
 
-The repository intentionally does not permanently hardcode one OpenAI model list because product catalogs and controls can change.
+TEMO uses a **canonical refresh model**.
 
-If the exact current choices are not visible to the AI, TEMO asks once for a screenshot or pasted list and maps the real choices.
+At the start of a new session, when repository access exists:
 
-## Reliable even when GitHub search fails
+1. read [`TEMO_LATEST.md`](TEMO_LATEST.md) once;
+2. compare the loaded version with the current manifest;
+3. if the loaded copy is older, load the current canonical `SKILL.md` or `TEMO_PORTABLE.md` before routing the first task;
+4. do not keep checking repeatedly during the same session.
 
-Some AI providers can open GitHub repositories directly. Others can browse the web but cannot reliably resolve a repository through search/indexing. Some have no external web access at all.
+If the update check fails, TEMO continues with the loaded copy instead of blocking the user's task.
 
-TEMO Efficiency now has three official access paths:
+### What “auto-update” does **not** mean
+
+TEMO does **not** silently rewrite this GitHub repository from arbitrary user sessions.
+
+Improvements enter through reviewed maintainer changes, GitHub Issues, or Pull Requests. This avoids a bad run automatically changing the canonical skill for everyone.
+
+---
+
+## Feedback loop: learn from real users without hidden telemetry
+
+TEMO does **not** silently upload conversations, screenshots, prompts, code, logs, account information, provider catalogs, or telemetry.
+
+When a meaningful signal happens, TEMO may prepare an optional compact feedback report, for example:
+
+- routing was too strong or too weak;
+- provider/model discovery failed;
+- a new provider exposes unfamiliar controls;
+- `CATALOG_HALLUCINATION_FAIL` occurred;
+- GitHub/portable fallback failed;
+- a regression guard prevented repeated work;
+- documentation was unclear;
+- a cross-device/provider test produced a useful PASS/FAIL.
+
+The user decides whether to submit it.
+
+Use the GitHub **TEMO Efficiency Feedback** issue form or see [`docs/FEEDBACK_LOOP.md`](docs/FEEDBACK_LOOP.md).
+
+Feedback is useful when it contains minimal reproducible evidence, not private data.
+
+---
+
+## Reliable when GitHub browsing is weak
+
+TEMO has three official access modes:
 
 ```text
 A. Full repository access
-   → load the canonical files normally
+   → use the canonical files
 
 B. Repository search/navigation fails
-   → stop retrying after one failure
-   → fetch the single raw portable file:
+   → stop after one failed lookup
+   → load the raw portable contract:
      https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
 
 C. No web access
    → upload/paste TEMO_PORTABLE.md once
-   → run the full core workflow from that one file
+   → use the core workflow from that one file
 ```
 
-[`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) is self-contained. If it is already loaded, the AI must **not** require the rest of the repository before using the core TEMO workflow.
+[`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) is self-contained.
 
-This fallback was added after a real cross-provider test showed that one AI could use the repository while another spent time trying to locate it and then asked for the skill manually.
+---
 
-The bootstrap itself follows TEMO Efficiency: **one failed repository lookup is enough to fall back**. Do not waste time repeatedly searching/indexing the same repository.
+## Quick activation in a new AI conversation
 
-## Load one file — bootstrap the workflow
-
-You have three valid entrypoints:
-
-- [`README.md`](README.md) when repository access works;
-- [`SKILL.md`](SKILL.md) when loading the formal skill contract;
-- [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) for a single-file portable/offline/no-browse setup.
-
-When full repository access works, the canonical bootstrap is:
-
-1. [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md)
-2. [`SKILL.md`](SKILL.md)
-3. [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md)
-4. [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml)
-5. [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md)
-6. [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md)
-7. [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md)
-8. [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) when actual execution is requested
-
-Do not repeatedly reload unchanged files during the same session.
-
-## Quick activation in a new ChatGPT / AI conversation
-
-Paste this compact activator:
+Paste:
 
 ```text
 Use TEMO Efficiency.
-First try: https://github.com/luaysameer/temo-efficiency
-If repository search/navigation fails, do NOT keep retrying it. Immediately load:
+First try the canonical repository:
+https://github.com/luaysameer/temo-efficiency
+
+If repository navigation/search fails, do NOT keep retrying it. Immediately load:
 https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
+
 Then follow TEMO Efficiency for my next task.
 ```
 
-If that AI has no external web access, upload **only `TEMO_PORTABLE.md`** and say:
+If the AI has no web access, upload only `TEMO_PORTABLE.md` and say:
 
 ```text
 Use the attached TEMO_PORTABLE.md as the TEMO Efficiency behavior contract for this chat.
 ```
 
-A public GitHub repository cannot automatically inject itself into an unrelated AI conversation unless the AI is given the repository/link/file and can read it.
-
-## Test it on another phone or computer
-
-A complete fresh-session test is included in:
-
-[`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md)
-
-It now tests three real portability modes:
-
-- full repository access;
-- GitHub search/navigation failure with raw-file fallback;
-- no external web access with one uploaded portable file.
-
-A correct run should:
-
-- discover/confirm the provider and catalog only when needed;
-- choose the model + level for the user;
-- show `EXECUTION CHOICE` before the command;
-- use a narrow checkpoint first;
-- preserve previous PASS results;
-- escalate one step only when evidence requires it;
-- avoid repeated GitHub search loops after an access failure.
+---
 
 ## Model routing
 
 TEMO scores the **current checkpoint**, not the importance of the whole project.
 
-Five dimensions are scored from 0–2:
+Five dimensions are scored 0–2:
 
 - Complexity
 - Risk
@@ -221,106 +212,94 @@ Five dimensions are scored from 0–2:
 | 6–8 | **DEEP** | medium/high | difficult regressions, architecture, coupled systems |
 | 9–10 | **MAX** | highest justified | exceptional complexity or high security/data/infrastructure risk |
 
-Routing uses capability profiles, then maps them to the user's **real discovered catalog**.
+A full exact ladder is created only from a **verified catalog**.
 
-## Micro-checkpoints
+If only the current model is known:
 
-Large work is split into bounded execution units.
+```text
+CATALOG STATUS: PARTIAL
+ROUTING MODE: CURRENT_MODEL_ONLY
+```
 
-Each checkpoint should state:
+---
+
+## Micro-checkpoints + LOCKED_PASS
+
+Large work is split into narrow checkpoints.
+
+Each checkpoint contains:
 
 - Tool/environment
-- Exact mapped model + TEMO profile
-- Exact reasoning/effort level when exposed
-- Consumption/boost state when exposed
-- One primary objective
-- Protected / do-not-repeat work
-- Targeted diagnostics/tests
-- Success condition
-- Stop condition
+- exact model + profile
+- exact reasoning/effort level when exposed
+- boost/consumption state when exposed
+- one primary objective
+- protected / do-not-repeat work
+- targeted diagnostics/tests
+- success condition
+- stop condition
 - Deploy YES/NO
 
-See [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md).
-
-## Regression Lock
-
-After a meaningful fix:
+After meaningful verified success:
 
 ```text
 diagnose → fix → targeted test → regression guard → real acceptance → LOCKED_PASS
 ```
 
-Future work touching that surface should preserve the verified result instead of paying for the same investigation again.
+Future work should preserve that PASS unless relevant code, dependencies, environment, provider catalog, requirements, or evidence changes.
 
-## Quality rule
-
-TEMO Efficiency does **not** save usage by lowering the quality bar.
-
-Acceptance criteria stay fixed.
-
-The savings target comes from:
-
-- using the smallest capable model/level;
-- sending only relevant context;
-- running targeted tests when appropriate;
-- avoiding repeated diagnostics;
-- protecting verified work;
-- escalating only with evidence.
-
-`IMPLEMENTED` is not the same as `VERIFIED`.
+---
 
 ## Local vs cloud execution
 
-TEMO also selects the execution environment.
+If a task requires local USB, Android ADB, local files, GPU, desktop UI, browser state, or attached hardware, TEMO should choose an execution environment that can physically reach it.
 
-If work requires local USB, filesystem access, GPU, desktop UI, or attached hardware, TEMO should choose a local environment instead of a cloud environment that cannot physically reach the device.
+---
 
-## Quick Start
+## Test TEMO on another phone/account/provider
 
-1. Load [`SKILL.md`](SKILL.md), this README, or [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md).
-2. Let TEMO discover/reuse the real provider model + level catalog.
-3. Give it a task and acceptance criteria.
+Use [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md).
 
-Copy/paste starter:
+It covers:
 
-```text
-Use the latest TEMO Efficiency rules from luaysameer/temo-efficiency.
-If normal repository access fails, fall back once to:
-https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
-Discover or reuse my actual AI provider/model/level catalog before choosing an exact model.
-Before every execution command, show the recommended Tool / Model / Profile / Level / Boost / Consumption / Deploy choice and one short reason.
-Choose for me when the environment is known; do not make me guess the model or level.
-Preserve acceptance criteria and previous PASS/VERIFIED work.
-Escalate only when diagnostics justify it.
+- full repository access;
+- raw portable fallback;
+- no-web single-file mode;
+- unknown provider/catalog;
+- different account model catalogs;
+- catalog hallucination prevention;
+- escalation behavior;
+- PASS preservation.
 
-Task: <describe the task>
-Acceptance criteria: <required result>
-Protected / do not change: <known PASS areas or limits>
-```
+---
 
-## Documentation
+## Key files
 
-- [`SKILL.md`](SKILL.md) — normative skill behavior
-- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — canonical bootstrap + fallback sequence
-- [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) — self-contained single-file fallback
-- [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md) — what the skill must do
-- [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md) — verify behavior on another device/session/provider
+- [`SKILL.md`](SKILL.md) — normative skill behavior, **v1.5.0**
+- [`TEMO_LATEST.md`](TEMO_LATEST.md) — current-version manifest
+- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — startup/update/fallback flow
+- [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) — self-contained portable contract
 - [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md) — provider/model/level discovery
-- [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md) — mandatory choice shown before execution
+- [`templates/CATALOG_CONFIDENCE_GATE.md`](templates/CATALOG_CONFIDENCE_GATE.md) — blocks model-catalog guessing
+- [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md) — model + level shown before execution
 - [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md) — micro-checkpoint contract
-- [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) — real execution header
-- [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml) — optional persistent mapping
-- [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — benchmark protocol
-- [`README.ar.md`](README.ar.md) — Arabic guide
+- [`docs/FEEDBACK_LOOP.md`](docs/FEEDBACK_LOOP.md) — opt-in feedback workflow
+- [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md) — portability/regression tests
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution guidance
+- [`README.ar.md`](README.ar.md) — الشرح العربي
+
+---
 
 ## What TEMO Efficiency does not do
 
-It does not bypass quotas, billing, plan restrictions, rate limits, or safety controls. It does not guarantee a fixed saving percentage. Results depend on the workload, provider/model capabilities, context size, verification needs, and environment.
+TEMO does not bypass quotas, billing, subscriptions, rate limits, plan restrictions, or safety controls.
 
-## Origin
+It does not guarantee a fixed saving percentage.
 
-TEMO Efficiency was developed through iterative real-project work under the **TEMO × AREEN** workflow: discover the real environment, choose the capability the current checkpoint deserves, verify precisely, and preserve what already passed.
+It does not use hidden telemetry or silently self-modify the canonical repository.
+
+The purpose is to reduce **avoidable AI work** while preserving the required quality bar.
 
 ## License
 
-MIT — use it, adapt it, test it, and improve it.
+MIT — use it, test it, adapt it, and improve it.
