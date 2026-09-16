@@ -11,7 +11,7 @@ ChatGPT / Claude / Codex / Gemini / other AI
         v
 TEMO Feedback Gateway (Cloudflare Worker)
         |
-        | validation + redaction + rate limit + duplicate check
+        | validation + redaction + rate limit + duplicate check + daily cap
         v
 GitHub Issues: luaysameer/temo-efficiency
         |
@@ -86,16 +86,20 @@ Cloudflare Workers Builds supports a repository root directory for monorepos and
 
 The Worker name in Cloudflare must match the `name` in `wrangler.jsonc`.
 
-## Rate limiting
+## Rate limiting and abuse caps
 
 Two Cloudflare Rate Limiting bindings are configured:
 
-- `CLIENT_RATE_LIMITER`: 6 submissions/minute per pseudonymous client key.
-- `GLOBAL_RATE_LIMITER`: 120 submissions/minute per Cloudflare location for the gateway.
+- `CLIENT_RATE_LIMITER`: **3 submissions/minute** per pseudonymous client key.
+- `GLOBAL_RATE_LIMITER`: **12 submissions/minute** per Cloudflare location for the gateway.
 
 The client key is SHA-256 hashed before it is used as the rate-limit key and is never written into the GitHub Issue.
 
 The configured rate-limit namespace IDs must be unique within the Cloudflare account. If `9515001` or `9515002` are already used by another Worker rate-limit binding in the same account, change them before deployment.
+
+The Worker also checks the number of gateway-created Issues for the current UTC day and stops creating new Issues when `MAX_DAILY_ISSUES` is reached. The default is **100/day**.
+
+This daily cap is enforced through GitHub's Issue search, so it remains global even when requests arrive through different Cloudflare locations.
 
 ## Duplicate protection
 
@@ -143,6 +147,7 @@ Successful new submission:
 5. Send an unsupported field such as `rawConversation` → HTTP 400.
 6. Send `consent: false` → HTTP 400.
 7. Exceed client rate limit → HTTP 429.
+8. Confirm the created Issue contains no client ID, email, raw conversation, code, logs, or token.
 
 ## After the gateway URL is verified
 
