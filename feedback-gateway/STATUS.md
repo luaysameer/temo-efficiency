@@ -1,10 +1,24 @@
 # TEMO Feedback Gateway Status
 
-Current state: **CODE_READY — DEPLOYMENT_PENDING**
+Current state: **DEPLOYED — HEALTH_PASS — SECRET_PENDING**
 
 Gateway version: `0.1.0`
+Production URL: `https://temo-feedback-gateway.cpu2turn.workers.dev`
 Target Worker name: `temo-feedback-gateway`
 Target repository: `luaysameer/temo-efficiency`
+
+## Verified PASS
+
+- Worker deployment succeeded from `main`.
+- Production workers.dev URL is enabled.
+- `GET /api/health` returns `ok: true`.
+- Health response reports:
+  - service: `TEMO Feedback Gateway`
+  - version: `0.1.0`
+  - target: `luaysameer/temo-efficiency`
+  - endpoint: `/v1/feedback`
+  - transport: `GitHub Issues`
+- `ready: false` is expected until the Cloudflare secret `GITHUB_TOKEN` is configured.
 
 ## Implemented
 
@@ -23,14 +37,22 @@ Target repository: `luaysameer/temo-efficiency`
 - Example feedback payload.
 - GitHub Actions validation workflow added.
 
+## Current blocker
+
+Create a fine-grained GitHub token restricted to `luaysameer/temo-efficiency` with the minimum repository permissions needed by the gateway, then store it only as the Cloudflare Worker secret:
+
+`GITHUB_TOKEN`
+
+After the secret is added, `/api/health` must report `ready: true` before Issue creation tests begin.
+
 ## Not yet ACTIVE
 
-Do not add a production gateway URL to `SKILL.md` or `TEMO_PORTABLE.md` until all live acceptance checks pass.
+Do not add the production gateway URL to `SKILL.md` or `TEMO_PORTABLE.md` until all live acceptance checks pass.
 
 ## Activation acceptance checks
 
-1. Worker deploy succeeds.
-2. `GET /api/health` returns `ok: true`.
+1. Worker deploy succeeds. — PASS
+2. `GET /api/health` returns `ok: true`. — PASS
 3. `GET /v1/schema` returns schema `1.0`.
 4. Valid test payload creates exactly one GitHub Issue.
 5. Repeating the same payload returns the existing Issue (`duplicate: true`).
