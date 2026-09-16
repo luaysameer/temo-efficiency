@@ -19,6 +19,7 @@ Target repository: `luaysameer/temo-efficiency`
   - target: `luaysameer/temo-efficiency`
   - endpoint: `/v1/feedback`
   - transport: `GitHub Issues`
+- Browser acceptance console is live at `/test.html` and renders the six acceptance-test actions.
 
 ## Implemented
 
@@ -34,12 +35,13 @@ Target repository: `luaysameer/temo-efficiency`
 - GitHub fine-grained token kept as Cloudflare `GITHUB_TOKEN` secret only.
 - Health endpoint.
 - Machine-readable schema endpoint.
+- Browser acceptance console.
 - Example feedback payload.
 - GitHub Actions validation workflow added.
 
 ## Current checkpoint
 
-The gateway is deployed and secret-ready. Live acceptance testing remains before the endpoint is published as the canonical feedback transport inside `SKILL.md` and `TEMO_PORTABLE.md`.
+The gateway is deployed, secret-ready, and the browser test console is live. Live API acceptance testing remains before the endpoint is published as the canonical feedback transport inside `SKILL.md` and `TEMO_PORTABLE.md`.
 
 ## Not yet ACTIVE
 
@@ -49,14 +51,15 @@ Do not add the production gateway URL to `SKILL.md` or `TEMO_PORTABLE.md` until 
 
 1. Worker deploy succeeds. — PASS
 2. `GET /api/health` returns `ok: true` and `ready: true`. — PASS
-3. `GET /v1/schema` returns schema `1.0`.
-4. Valid test payload creates exactly one GitHub Issue.
-5. Repeating the same payload returns the existing Issue (`duplicate: true`).
-6. `rawConversation` is rejected with HTTP 400.
-7. `consent: false` is rejected with HTTP 400.
-8. GitHub token is not present in source, responses, logs, or Issue body.
-9. Created Issue contains only structured/redacted feedback.
-10. Maintainer receives the expected GitHub notification according to repository notification settings.
+3. Browser acceptance console `/test.html` renders. — PASS
+4. `GET /v1/schema` returns schema `1.0`.
+5. Valid test payload creates exactly one GitHub Issue.
+6. Repeating the same payload returns the existing Issue (`duplicate: true`).
+7. `rawConversation` is rejected with HTTP 400.
+8. `consent: false` is rejected with HTTP 400.
+9. GitHub token is not present in source, responses, logs, or Issue body.
+10. Created Issue contains only structured/redacted feedback.
+11. Maintainer receives the expected GitHub notification according to repository notification settings.
 
 After all checks PASS, update this file to:
 
