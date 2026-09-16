@@ -1,29 +1,62 @@
 # TEMO Efficiency — Universal Bootstrap
 
-Loading either `README.md` or `SKILL.md` is enough to start TEMO Efficiency when the AI can access the canonical repository.
+Loading either `README.md`, `SKILL.md`, or `TEMO_PORTABLE.md` is enough to start TEMO Efficiency.
 
 Canonical repository:
 
 `luaysameer/temo-efficiency`
 
-## Bootstrap sequence
+Portable raw entrypoint:
 
-When TEMO Efficiency is invoked from either `README.md` or `SKILL.md`:
+`https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md`
 
-1. Read the current `SKILL.md` as the normative behavior contract.
-2. Read `docs/BEHAVIOR_CONTRACT.md` for the required user experience and portable behavior.
-3. Read `config/model-ladder.example.yaml` for profile/routing defaults.
-4. Read `templates/PROVIDER_DISCOVERY.md` to discover the actual provider, model catalog, and reasoning/effort controls.
-5. Read `templates/EXECUTION_CHOICE.md` for the mandatory user-facing choice shown before execution.
-6. Read `templates/CHECKPOINT.md` for the micro-checkpoint contract.
-7. Read `templates/EXECUTION_HEADER.md` only when execution is actually requested.
-8. Use `docs/CROSS_DEVICE_TEST.md` when the user wants to verify that the skill behaves correctly in a fresh session, on another device, or with another provider.
+## Access modes — use the first one that works
 
-Do not repeatedly reload unchanged material during the same session. Preserve the provider/model mapping and all previous PASS/VERIFIED state.
+TEMO Efficiency must not depend on one AI provider having perfect GitHub repository browsing.
 
-If repository access is unavailable, continue using the loaded copy and never invent missing model names, levels, boost modes, or controls.
+### Mode A — repository-aware agent
 
-## Provider discovery comes before model routing
+If the canonical repository is directly accessible, read the current canonical files before executing work:
+
+1. `SKILL.md`
+2. `docs/BEHAVIOR_CONTRACT.md`
+3. `config/model-ladder.example.yaml`
+4. `templates/PROVIDER_DISCOVERY.md`
+5. `templates/EXECUTION_CHOICE.md`
+6. `templates/CHECKPOINT.md`
+7. `templates/EXECUTION_HEADER.md` only when execution is actually requested
+8. `docs/CROSS_DEVICE_TEST.md` when portability/testing is requested
+
+### Mode B — direct URL works but repository navigation/search fails
+
+Do not keep searching GitHub repeatedly.
+
+After one failed repository lookup/index/search attempt, fetch the portable raw file directly:
+
+`https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md`
+
+Use `TEMO_PORTABLE.md` as the complete behavior contract for the session. It is self-contained and does not require the other repository files.
+
+### Mode C — no external web/repository access
+
+If the user uploaded or pasted `TEMO_PORTABLE.md`, use it directly and continue. Do not require the rest of the repository.
+
+If only a stale/full `SKILL.md` copy is already loaded, use that copy and do not invent missing model names, levels, boost modes, or controls.
+
+The repository cannot inject itself into an unrelated AI session without access or supplied content, so the portable single-file fallback is the official offline/no-browse path.
+
+## Efficiency rule for bootstrap itself
+
+Bootstrap must also follow TEMO Efficiency:
+
+- Do not spend 10–20 seconds repeatedly searching/indexing the same repository.
+- One failed repository lookup is enough to try the raw portable URL.
+- One failed raw fetch is enough to use an uploaded/pasted portable file or ask for that one file.
+- Do not ask for multiple repository files when `TEMO_PORTABLE.md` is sufficient.
+- Do not reload unchanged TEMO files during the same session.
+- Preserve the provider/model mapping and all previous PASS/VERIFIED state.
+
+## Provider discovery comes before exact model routing
 
 Before choosing FAST / BALANCED / DEEP / MAX, determine what environment the user is actually using.
 
@@ -42,6 +75,8 @@ For ChatGPT, OpenAI, or Codex:
 - use the current models and reasoning/effort controls exposed by the active environment when available;
 - do not hardcode a permanent OpenAI catalog because product names and controls can change;
 - if the exact current choices are not visible, request one screenshot or pasted list, then map those real choices into the TEMO ladder.
+
+Environment identity does not automatically prove the exact model picker/catalog. If the exact catalog is not authoritative, discover it instead of guessing.
 
 ## Other providers/tools
 
@@ -106,13 +141,17 @@ The user should not have to guess which model or level to select when TEMO Effic
 
 ## Portable activation
 
-In a fresh supported AI conversation with repository access, the user can say:
+For a fresh conversation, prefer this compact activation:
 
 ```text
-Use TEMO Efficiency from https://github.com/luaysameer/temo-efficiency
-Load the current SKILL.md and TEMO_BOOTSTRAP.md, follow them as the execution behavior contract for this chat, and do not execute my task until you have completed the provider/model/level discovery required by the skill.
+Use TEMO Efficiency.
+First try the canonical repository: https://github.com/luaysameer/temo-efficiency
+If repository navigation/search fails, immediately load the portable contract from:
+https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
+Do not keep retrying GitHub search.
+Then follow TEMO Efficiency for my next task.
 ```
 
-If the AI environment cannot access GitHub, the user must provide/upload the relevant TEMO skill files. The repository cannot inject itself into an unrelated AI session without being given access or the files.
+If the environment has no external web access at all, upload or paste **only `TEMO_PORTABLE.md`**. No other TEMO file is required for core behavior.
 
-The expected cross-device/fresh-session behavior is defined in `docs/CROSS_DEVICE_TEST.md`.
+The expected fresh-session/provider behavior is defined in `docs/CROSS_DEVICE_TEST.md`.
