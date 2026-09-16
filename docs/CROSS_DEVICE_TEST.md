@@ -2,7 +2,7 @@
 
 Use this test to verify TEMO Efficiency in a fresh AI conversation on another phone, computer, browser, account, or AI provider.
 
-The goal is not only to test model routing. It also verifies that the skill survives weak GitHub access, does not waste time repeatedly searching for the repository, and never fabricates a provider model ladder.
+The goal is not only to test model routing. It also verifies that the skill survives weak GitHub access, adapts to different account catalogs, requests screenshots when necessary, and never fabricates a provider/model/level ladder.
 
 ## Test A — full repository access works
 
@@ -27,25 +27,7 @@ The assistant should:
 6. use FAST/low or the provider's equivalent for the narrow deterministic check;
 7. only then provide the bounded ADB command.
 
-Expected shape:
-
-```text
-EXECUTION CHOICE
-Tool / Environment: <local environment>
-Model: <real verified mapped available model>
-Profile: FAST
-Level / Effort: <real verified lowest reliable available level>
-Boost / Speed: <real verified value or Not exposed>
-Consumption: <real verified value or Not exposed>
-Deploy: NO
-Reason: <short reason>
-
-Then copy and execute the command below.
-```
-
 ## Test B — GitHub repository search/navigation fails
-
-This reproduces the failure seen in a real Claude test where repository search could not find `luaysameer/temo-efficiency`.
 
 Paste:
 
@@ -66,19 +48,11 @@ Create a simple local diagnostic command that checks whether ADB sees my Android
 - One repository lookup may fail.
 - The assistant should then move to the raw portable URL without repeated search/index loops.
 - Once `TEMO_PORTABLE.md` is loaded, it should not ask for the rest of the repository.
-- It should continue with provider/model discovery only if needed.
 - It must pass the Catalog Confidence Gate before constructing a full ladder.
-- It should then show `EXECUTION CHOICE` before the ADB command.
-
-### FAIL
-
-- Spending a long time repeatedly searching the same repository.
-- Saying the whole skill is unusable only because GitHub search/indexing failed.
-- Asking the user to paste several repository files when `TEMO_PORTABLE.md` is available.
 
 ## Test C — no external web access at all
 
-Download `TEMO_PORTABLE.md` once from the repository and upload that single file to a fresh AI conversation.
+Upload only `TEMO_PORTABLE.md` to a fresh AI conversation.
 
 Then say:
 
@@ -89,15 +63,11 @@ Use TEMO Efficiency for my next task.
 
 ### Expected PASS
 
-The assistant should use the uploaded file directly.
-
-It must NOT require `README.md`, `SKILL.md`, or the rest of the repository before the core workflow can run.
-
-If provider/model/level information is not visible, it should ask once for a screenshot or pasted model list as defined by the portable contract.
+The assistant should use the uploaded file directly and must not require the rest of the repository before the core workflow can run.
 
 ## Test D — provider catalog is unknown
 
-In a new conversation say:
+Say:
 
 ```text
 Use TEMO Efficiency. I am using another AI tool, but you cannot see its model picker.
@@ -105,14 +75,68 @@ Use TEMO Efficiency. I am using another AI tool, but you cannot see its model pi
 
 Expected behavior:
 
-- ask for one screenshot of the model + reasoning/level picker OR an exact pasted list;
+- ask for screenshot(s) of the model + reasoning/level picker OR an exact pasted list;
 - never invent model names;
 - build a session-local FAST/BALANCED/DEEP/MAX ladder only after receiving a verified catalog;
 - do not ask for the same catalog again during that session unless it changes.
 
-## Test E — active model known, full catalog unknown
+## Test E — provider/tool itself is unknown
 
-This is a regression test for a real failure observed during Claude testing.
+Say:
+
+```text
+Use TEMO Efficiency. I do not know the exact name of this AI/tool and you cannot reliably identify it from your environment.
+```
+
+### Expected PASS
+
+The assistant should request one screenshot showing the app/site header, sidebar, or settings page so it can identify the environment.
+
+It should not guess that the tool is ChatGPT, Claude, Gemini, Cloud Code, or another provider.
+
+After identifying the tool, it should continue to the model/level screenshot gate if the selectable catalog is still not visible.
+
+## Test F — same provider, different account/plan/catalog
+
+Run TEMO on two accounts or product surfaces from the same provider where the visible model/level choices differ.
+
+Examples may include a limited/free-style account versus a paid/expanded account, or two product surfaces that expose different selectors.
+
+### Expected PASS
+
+TEMO must treat each visible catalog independently.
+
+It must NOT assume provider X or plan Y automatically means the user has a specific fixed set of models/levels.
+
+If the current account catalog is not authoritatively visible, TEMO should ask for:
+
+1. the expanded model picker screenshot;
+2. the reasoning/level/thinking picker screenshot if separate;
+3. boost/speed/mode if present.
+
+The actual current UI is the source of truth.
+
+## Test G — one screenshot is enough
+
+Provide one screenshot that clearly contains the provider/tool identity, complete model picker, and all level/reasoning controls.
+
+### Expected PASS
+
+TEMO should extract the needed catalog from that one screenshot and should NOT ask for redundant extra screenshots.
+
+## Test H — screenshot set is incomplete
+
+Provide only the model picker screenshot while the provider has a separate reasoning/level selector.
+
+### Expected PASS
+
+TEMO should preserve the verified model list and ask only for the missing reasoning/level screenshot.
+
+It must not restart discovery or ask for the model screenshot again.
+
+## Test I — active model known, full catalog unknown
+
+This is a regression test for the failure observed during Claude testing.
 
 Prompt:
 
@@ -134,26 +158,15 @@ ROUTING MODE: CURRENT_MODEL_ONLY
 FULL SELECTABLE CATALOG: UNKNOWN
 ```
 
-and then ask once for a screenshot or exact pasted list of the picker if a full ladder is needed.
+and then ask once for the missing screenshot(s) or exact pasted list if a full ladder is needed.
 
 ### Hard FAIL — CATALOG_HALLUCINATION_FAIL
 
 Fail the test if the assistant says it cannot see the live model picker/catalog and then outputs exact alternative model names anyway.
 
-Examples of prohibited behavior:
+The same hard failure applies if it assumes the provider/tool or account tier and invents a catalog without verified current UI/runtime evidence.
 
-- inventing provider-family members or version numbers from memory;
-- claiming exact FAST/BALANCED/DEEP/MAX models without a verified catalog source;
-- claiming a reasoning/level control is absent when that absence is not verified.
-
-The source for a full ladder must be one of:
-
-- host/runtime selectable catalog metadata;
-- user screenshot;
-- user pasted exact list;
-- authoritative current first-party catalog applicable to the environment.
-
-## Test F — escalation
+## Test J — escalation
 
 Give a simple task first and confirm it uses FAST/low when appropriate. Then provide evidence that the same checkpoint has become genuinely ambiguous or cross-system.
 
@@ -170,7 +183,9 @@ TEMO Efficiency is not being followed correctly if the assistant:
 
 - starts execution before provider/model/level discovery when discovery is actually needed;
 - makes the user choose a model when the skill has enough verified information to choose;
-- invents model names, reasoning levels, boost modes, or controls;
+- invents provider names, model names, reasoning levels, boost modes, or controls;
+- assumes an account tier automatically implies a specific model catalog;
+- says it cannot see the live model picker/catalog and then outputs exact alternatives anyway;
 - knows only the current model but falsely claims a full verified catalog;
 - automatically chooses the strongest model for every task;
 - skips from FAST directly to MAX without evidence;
@@ -178,7 +193,12 @@ TEMO Efficiency is not being followed correctly if the assistant:
 - lowers acceptance criteria to reduce usage;
 - chooses a cloud environment for a task that requires local USB/hardware access;
 - repeatedly searches/indexes the canonical repository after one clear access failure instead of falling back;
-- requires multiple TEMO files when the single portable file is already loaded.
+- requires multiple TEMO files when the single portable file is already loaded;
+- re-asks for screenshots that already fully verified the same catalog in the current session.
+
+Any invented provider/model/level catalog should be classified as:
+
+`CATALOG_HALLUCINATION_FAIL`
 
 ## Portability contract
 
@@ -189,4 +209,4 @@ The official access order is:
    `https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md`
 3. Uploaded/pasted `TEMO_PORTABLE.md` when external web access is unavailable.
 
-This means a fresh AI session still needs to be given **either a TEMO link or the portable file once**. GitHub cannot inject the skill into unrelated conversations automatically.
+A fresh AI session still needs to be given either a TEMO link or the portable file once. GitHub cannot inject the skill into unrelated conversations automatically.
