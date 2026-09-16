@@ -1,6 +1,6 @@
 # TEMO Efficiency — Portable Single-File Skill
 
-Version: 1.1 portable contract
+Version: 1.2 portable contract
 Canonical repository: `luaysameer/temo-efficiency`
 
 This file is intentionally **self-contained**. It is the fallback for AI environments that cannot browse the GitHub repository, cannot follow repository-relative links, or do not support installing the full skill directory.
@@ -17,37 +17,59 @@ Never lower the requested quality bar to save usage.
 
 Before choosing an exact model, determine the real AI/tool environment unless it is already authoritatively known.
 
-- If provider, current models, and reasoning/effort levels are visible to the agent, use them directly.
+- If provider, exact selectable models, and reasoning/effort levels are authoritatively visible to the agent, use them directly.
 - Do not ask the user for information already exposed by the current environment.
 - If the provider/tool is unknown, ask once which AI/tool is being used.
-- If exact model names or levels are not visible, ask for **one screenshot** of the model + level/reasoning picker OR a pasted list of the exact available choices.
-- Never invent model names, level names, boost controls, pricing tiers, or provider capabilities.
+- If the user does not know the tool name, request one screenshot showing the app/site header, sidebar, or settings page.
+- If exact model names or levels are not visible, request screenshot(s) of the expanded model picker and reasoning/level picker, plus boost/speed/mode only if such a separate control exists.
+- If screenshots are inconvenient, accept an exact pasted list of the visible labels.
+- Never invent provider identity, model names, level names, boost controls, pricing tiers, or provider capabilities.
 - Reuse the discovered catalog for the current session unless it changes.
 
-For ChatGPT/OpenAI/Codex, use the current model and effort controls exposed by the active environment. Do not rely on a permanently hardcoded OpenAI model list.
+Provider name alone is not enough. Plan/tier name alone is not enough. Knowing one active model is not enough.
+
+Different accounts, plans, experiments, regions, apps, and product surfaces may expose different choices. The user's real current UI/runtime catalog is the source of truth.
+
+For ChatGPT/OpenAI/Codex, use the current model and effort controls exposed by the active environment. Do not rely on a permanently hardcoded OpenAI model list or assumptions about what a given account tier should expose.
 
 For Claude/Claude Code, Gemini, Cursor, Copilot, Cloud Code, local models, or another provider, use its real visible/supplied catalog and map only options that actually exist.
 
 ## 3. Mandatory Catalog Confidence Gate
 
-Provider identity is not the same as catalog knowledge.
+A provider/model/level option is VERIFIED only when it comes from at least one of these sources:
 
-Knowing one current/active model is also not the same as knowing every model selectable by the user.
-
-A model/level option is VERIFIED only when it comes from at least one of these sources:
-
-1. host/runtime metadata that explicitly exposes the current selectable model catalog or exact controls;
-2. a user screenshot showing the real model + level picker;
-3. a pasted list from the user containing the exact visible choices;
-4. an authoritative current first-party catalog exposed to the agent and applicable to the user's environment.
+1. host/runtime metadata that explicitly exposes the current provider and selectable model/control catalog;
+2. user screenshot(s) showing the real current model + level picker;
+3. an exact pasted list from the user containing the visible choices;
+4. an authoritative current first-party catalog exposed to the agent and demonstrably applicable to the user's exact environment/account surface.
 
 The following are NOT valid sources for constructing an exact ladder:
 
 - the model's own memory of product/model names;
-- guessing version numbers or family members;
+- guessing based on provider brand, account tier, naming patterns, or model families;
 - extrapolating alternatives from one active model;
 - generic/stale documentation that does not establish the user's current selectable catalog;
 - statements such as "this provider usually has...".
+
+### Mandatory screenshot fallback
+
+If the exact provider/model/level catalog is not authoritatively visible, ask for the smallest set of screenshots needed:
+
+```text
+I can’t verify the exact model + level choices available on your current AI/account yet.
+Send screenshots of:
+1) the expanded model picker,
+2) the expanded reasoning/level/thinking picker if separate,
+3) any boost/speed/mode selector if present.
+If the AI/tool itself is unclear, include one screenshot showing the app/site header or settings page.
+
+If screenshots are inconvenient, paste the exact visible labels instead.
+I’ll map them once and reuse the ladder for this session.
+```
+
+If one screenshot shows everything, one screenshot is enough.
+
+Do not continue to a full ladder until the missing fields are verified.
 
 ### Active model known, full catalog unknown
 
@@ -58,11 +80,10 @@ CATALOG STATUS: PARTIAL
 ROUTING MODE: CURRENT_MODEL_ONLY
 CURRENT MODEL: <verified current model>
 FULL SELECTABLE CATALOG: UNKNOWN
+ACTION: Request screenshot/list before recommending a different model.
 ```
 
 Do NOT invent a full FAST/BALANCED/DEEP/MAX ladder.
-
-Ask once for one screenshot of the model/level picker or a pasted exact list.
 
 If the current checkpoint can safely proceed on the already-active model before that screenshot/list arrives, TEMO may operate in `CURRENT_MODEL_ONLY` mode, but it must not claim a verified full ladder.
 
@@ -74,7 +95,8 @@ Before outputting exact FAST/BALANCED/DEEP/MAX model names, verify:
 PROVIDER KNOWN: YES
 FULL SELECTABLE CATALOG KNOWN: YES
 LEVEL/REASONING CONTROLS KNOWN: YES or verified Not exposed
-SOURCE: host metadata | user screenshot | user pasted list | authoritative first-party catalog
+BOOST/SPEED/MODE CONTROLS: VERIFIED or verified Not exposed
+SOURCE: host metadata | user screenshot(s) | user pasted list | applicable first-party catalog
 CATALOG CONFIDENCE: VERIFIED
 ```
 
@@ -82,7 +104,7 @@ If any exact model/level information is uncertain:
 
 ```text
 CATALOG CONFIDENCE: PARTIAL / UNVERIFIED
-ACTION: Ask once for screenshot or pasted exact list.
+ACTION: Ask once for required screenshot(s) or pasted exact list.
 ```
 
 Do not continue to a fabricated ladder.
@@ -93,7 +115,7 @@ If the assistant says it cannot see the live model picker/catalog and then outpu
 
 `CATALOG_HALLUCINATION_FAIL`
 
-This is a mandatory regression failure.
+The same hard failure applies if the assistant assumes the provider/tool or account tier and builds a catalog without verified current UI/runtime evidence.
 
 Provider-specific claims such as "this provider does not expose a reasoning control" also require verified current UI/runtime/provider evidence. If not verified, say `Not visible / not verified`.
 
@@ -113,7 +135,7 @@ MAX MODEL: <strongest available model, exceptional use only>
 MAX LEVEL: <highest justified supported level>
 BOOST / SPEED CONTROL: <available values or Not exposed>
 CONSUMPTION CONTROL: <available values or Not exposed>
-SOURCE: <host catalog | screenshot | pasted list | authoritative first-party catalog>
+SOURCE: <host metadata | screenshot(s) | pasted list | applicable first-party catalog>
 CATALOG CONFIDENCE: VERIFIED
 ```
 
