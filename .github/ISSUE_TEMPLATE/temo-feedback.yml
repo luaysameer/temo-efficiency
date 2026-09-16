@@ -1,12 +1,12 @@
 name: TEMO Efficiency Feedback
-description: Share a real routing, provider-discovery, portability, verification, or documentation result.
+description: Share a real routing, misunderstanding, provider-discovery, portability, verification, or documentation result.
 title: "[TEMO Feedback] "
 body:
   - type: markdown
     attributes:
       value: |
         Thanks for testing TEMO Efficiency on a real workflow.
-        Please share only the minimum reproducible evidence. Do not include passwords, API keys, private tokens, personal information, or confidential code.
+        Please share only the minimum reproducible evidence. Do not include passwords, API keys, private tokens, personal information, confidential code, or full private conversations.
 
   - type: dropdown
     id: language
@@ -19,11 +19,22 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: feedback_mode
+    attributes:
+      label: Feedback mode
+      options:
+        - Manual
+        - Ask-before-send
+        - Auto-anonymous
+    validations:
+      required: true
+
   - type: input
     id: provider
     attributes:
       label: AI provider / tool
-      description: ChatGPT, Codex, Claude, Claude Code, Gemini, Cursor, Cloud Code, local model, or other.
+      description: ChatGPT, Codex, Claude, Claude Code, Gemini, Cursor, Cloud Code, local model, other, or Unknown.
       placeholder: e.g. ChatGPT
     validations:
       required: true
@@ -35,29 +46,54 @@ body:
       placeholder: e.g. 1.5.0
 
   - type: dropdown
-    id: signal_type
+    id: signal_code
     attributes:
-      label: Feedback type
+      label: Signal code
       options:
-        - Model/profile routing
-        - Reasoning/level routing
-        - Provider/model discovery
-        - Catalog confidence / screenshot flow
-        - Bootstrap / GitHub / portable fallback
-        - Escalation behavior
-        - Verification / LOCKED_PASS
-        - Consumption/context efficiency
-        - Documentation / usability
-        - Other
+        - REPEATED_MISUNDERSTANDING
+        - REPEATED_QUESTION
+        - CONTEXT_MISS
+        - EXECUTION_DRIFT
+        - ROUTING_TOO_WEAK
+        - ROUTING_TOO_STRONG
+        - CATALOG_DISCOVERY_FAIL
+        - CATALOG_HALLUCINATION_FAIL
+        - BOOTSTRAP_FAIL
+        - TOOL_ENVIRONMENT_MISMATCH
+        - VERIFICATION_FAIL
+        - LOCKED_PASS_REGRESSION
+        - PORTABLE_FALLBACK_PASS
+        - REGRESSION_GUARD_PASS
+        - DOCUMENTATION_USABILITY
+        - OTHER
     validations:
       required: true
+
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Signal confidence
+      options:
+        - Low
+        - Medium
+        - High
+    validations:
+      required: true
+
+  - type: input
+    id: retry_count
+    attributes:
+      label: Retry / correction count
+      description: If relevant, how many times did the same requirement/question need to be repeated or corrected?
+      placeholder: e.g. 3
 
   - type: textarea
     id: catalog
     attributes:
       label: Available models / levels (optional)
-      description: Paste only the exact visible labels if relevant. Screenshots are optional.
+      description: Paste only exact visible labels if relevant. Screenshots are optional and should be redacted.
       placeholder: |
+        Catalog status: VERIFIED_FULL / VERIFIED_CURRENT_ONLY / UNKNOWN
         Models: ...
         Levels/Thinking: ...
         Boost/Speed: ...
@@ -86,13 +122,25 @@ body:
       required: true
 
   - type: textarea
+    id: missed_contract
+    attributes:
+      label: Missed requirement / contract (if applicable)
+      description: What exact requirement, constraint, prior answer, or PASS state was repeatedly missed?
+
+  - type: textarea
     id: happened
     attributes:
       label: What happened?
       description: Keep it concise and reproducible.
-      placeholder: Describe the behavior you observed.
+      placeholder: Describe the observed behavior in 2–5 lines.
     validations:
       required: true
+
+  - type: textarea
+    id: likely_cause
+    attributes:
+      label: Likely cause (optional)
+      description: Evidence-based only. Use Unknown if uncertain.
 
   - type: textarea
     id: expected
@@ -118,5 +166,5 @@ body:
     attributes:
       label: Privacy check
       options:
-        - label: I removed secrets, tokens, personal information, and confidential data from this report.
+        - label: I removed secrets, tokens, personal information, confidential data, and unnecessary private conversation content from this report.
           required: true
