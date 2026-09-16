@@ -30,6 +30,20 @@ routing:
   score_6_8: "deep"
   score_9_10: "max"
 
+presentation:
+  show_before_execution: true
+  required_fields:
+    - "tool_or_environment"
+    - "model"
+    - "profile"
+    - "level_or_effort"
+    - "boost_or_speed"
+    - "consumption"
+    - "reason"
+  instruction_label: "Then copy and execute the command below"
+  choose_for_user_when_possible: true
+  do_not_make_user_guess: true
+
 policy:
   preserve_acceptance_criteria: true
   repeat_verified_work: false
@@ -37,3 +51,4 @@ policy:
   deploy_by_default: false
   boost_by_default: false
   escalate_one_level_at_a_time: true
+  present_execution_choice_before_command: true
