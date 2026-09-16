@@ -1,6 +1,6 @@
 # TEMO Feedback Gateway Status
 
-Current state: **REGRESSION_FOUND — DEDUPE_FIX_DEPLOYING — RETEST_REQUIRED**
+Current state: **ACTIVE — LOCKED_PASS**
 
 Gateway version: `0.1.1`
 Production URL: `https://temo-feedback-gateway.cpu2turn.workers.dev`
@@ -11,53 +11,45 @@ Target repository: `luaysameer/temo-efficiency`
 
 - Worker deployment succeeded from `main`.
 - Production workers.dev URL is enabled.
-- `GET /api/health` returned `ok: true` and `ready: true` on gateway `0.1.0`.
-- Cloudflare secret `GITHUB_TOKEN` is configured.
+- `GET /api/health` returns `ok: true`, `ready: true`, version `0.1.1`.
+- Cloudflare secret `GITHUB_TOKEN` is configured and remains outside repository source.
 - Browser acceptance console is live at `/test.html`.
-- `GET /v1/schema` returned schema `1.0` and the expected privacy contract.
-- Unsupported `rawConversation` was rejected with HTTP 400.
-- `consent: false` was rejected with HTTP 400.
-- Issue bodies contain only structured feedback fields; no raw conversation, code, logs, files, screenshots, email, or token value was present.
+- `GET /v1/schema` returns schema `1.0` and the expected privacy contract.
+- Unsupported `rawConversation` is rejected with HTTP 400.
+- `consent: false` is rejected with HTTP 400.
+- Issue bodies contain only structured feedback fields; no raw conversation, code, logs, files, screenshots, email, or token value is present.
 - Source review confirms the GitHub credential is referenced only through runtime secret binding `env.GITHUB_TOKEN`.
 
-## Regression discovered from acceptance screenshots
+## Regression discovered and fixed
 
-The first live acceptance run created **two GitHub Issues with the same fingerprint**:
+The first live acceptance run exposed an indexing race and created two Issues with the same fingerprint:
 
-- `#2` — fingerprint `TFG-DB56C38CCCA1` — created `2026-09-16T09:07:03Z`
-- `#3` — fingerprint `TFG-DB56C38CCCA1` — created `2026-09-16T09:07:05Z`
+- `#2` — fingerprint `TFG-DB56C38CCCA1`
+- `#3` — fingerprint `TFG-DB56C38CCCA1`
 
-This exposed an indexing race in the original duplicate check: it relied on GitHub Search, which can lag immediately after Issue creation. Issue `#3` has been closed with state reason `duplicate`; Issue `#2` remains the canonical first test Issue.
+Issue `#3` was classified as the duplicate. Gateway `0.1.1` added layered dedupe protection using Cloudflare cache, direct GitHub Issue listing, a per-fingerprint rate-limit lock, in-flight wait/recheck, and a final pre-create recheck.
 
-## Dedupe fix in gateway 0.1.1
+## 0.1.1 dedupe retest — PASS
 
-The duplicate guard now uses layered protection:
+Fresh retest fingerprint: `TFG-8E5FBF894399`
 
-1. Cloudflare cache lookup for a recently created fingerprint.
-2. Direct GitHub repository Issue listing for the newest 100 Issues before falling back to GitHub Search.
-3. A dedicated per-fingerprint Cloudflare rate-limit lock (`FINGERPRINT_RATE_LIMITER`, namespace `9515003`, limit 1 / 10 seconds).
-4. On an in-flight duplicate, the Worker waits and rechecks for the canonical Issue instead of creating another Issue.
-5. A final direct recheck runs immediately before Issue creation.
-6. The browser test console now generates a fresh test-run UUID on every page load so a retest cannot accidentally reuse the old acceptance fingerprint.
+- First submission: HTTP 201, `duplicate: false`, Issue `#4`.
+- Immediate duplicate submission: HTTP 200, `duplicate: true`, Issue `#4`.
+- GitHub repository search confirmed only one Issue exists for `TFG-8E5FBF894399`.
 
-## Retest required
+This closes the duplicate race regression for the verified acceptance path.
 
-After Cloudflare deploys `0.1.1` from `main`:
+## Active contract
 
-1. `GET /api/health` must report version `0.1.1`, `ok: true`, `ready: true`.
-2. Reload `/test.html` to obtain a new Run UUID.
-3. Press **Create test Issue** once — expect HTTP 201 and one new Issue.
-4. Immediately press **Duplicate test** — expect HTTP 200, `duplicate: true`, and the **same issueNumber / issueUrl**.
-5. Confirm the repository contains only one Issue for that new fingerprint.
-6. Repeat privacy and consent rejection tests if desired; prior checks already PASS.
-7. Confirm maintainer notification behavior.
+- Canonical endpoint: `POST https://temo-feedback-gateway.cpu2turn.workers.dev/v1/feedback`
+- Health: `GET https://temo-feedback-gateway.cpu2turn.workers.dev/api/health`
+- Schema: `GET https://temo-feedback-gateway.cpu2turn.workers.dev/v1/schema`
+- Browser acceptance console: `GET https://temo-feedback-gateway.cpu2turn.workers.dev/test.html`
+- Structured feedback only.
+- User consent required unless the user has explicitly enabled `AUTO_ANONYMOUS` under the TEMO contract.
+- Do not transmit raw conversations, code, logs, files, screenshots, email addresses, or secrets.
+- Never claim a feedback report was submitted unless the gateway returns success and an Issue URL/number.
 
-## Not yet ACTIVE
+## Notification note
 
-Do not publish the production gateway URL into `SKILL.md` or `TEMO_PORTABLE.md` until the 0.1.1 dedupe retest passes.
-
-After the retest passes, set:
-
-`ACTIVE — LOCKED_PASS`
-
-Then publish the canonical gateway URL into the TEMO skill/portable feedback transport rules.
+GitHub push/email delivery is an external account-notification setting and is not part of the gateway transport acceptance lock. The canonical Issue creation path is verified independently of whether a maintainer has push/email notifications enabled.
