@@ -2,7 +2,7 @@
 
 Use this test to verify TEMO Efficiency in a fresh AI conversation on another phone, computer, browser, account, or AI provider.
 
-The goal is not only to test model routing. It also verifies that the skill survives weak GitHub access and does not waste time repeatedly searching for the repository.
+The goal is not only to test model routing. It also verifies that the skill survives weak GitHub access, does not waste time repeatedly searching for the repository, and never fabricates a provider model ladder.
 
 ## Test A — full repository access works
 
@@ -21,21 +21,22 @@ The assistant should:
 
 1. load/reuse the TEMO behavior;
 2. discover or reuse the actual provider/model/level catalog only if needed;
-3. choose a local environment because USB/ADB is local;
-4. show `EXECUTION CHOICE` before the command;
-5. use FAST/low or the provider's equivalent for the narrow deterministic check;
-6. only then provide the bounded ADB command.
+3. pass the Catalog Confidence Gate before claiming a full exact ladder;
+4. choose a local environment because USB/ADB is local;
+5. show `EXECUTION CHOICE` before the command;
+6. use FAST/low or the provider's equivalent for the narrow deterministic check;
+7. only then provide the bounded ADB command.
 
 Expected shape:
 
 ```text
 EXECUTION CHOICE
 Tool / Environment: <local environment>
-Model: <real mapped available model>
+Model: <real verified mapped available model>
 Profile: FAST
-Level / Effort: <real lowest reliable available level>
-Boost / Speed: <real value or Not exposed>
-Consumption: <real value or Not exposed>
+Level / Effort: <real verified lowest reliable available level>
+Boost / Speed: <real verified value or Not exposed>
+Consumption: <real verified value or Not exposed>
 Deploy: NO
 Reason: <short reason>
 
@@ -65,7 +66,9 @@ Create a simple local diagnostic command that checks whether ADB sees my Android
 - One repository lookup may fail.
 - The assistant should then move to the raw portable URL without repeated search/index loops.
 - Once `TEMO_PORTABLE.md` is loaded, it should not ask for the rest of the repository.
-- It should continue with provider/model discovery only if needed, then show `EXECUTION CHOICE` before the ADB command.
+- It should continue with provider/model discovery only if needed.
+- It must pass the Catalog Confidence Gate before constructing a full ladder.
+- It should then show `EXECUTION CHOICE` before the ADB command.
 
 ### FAIL
 
@@ -90,7 +93,7 @@ The assistant should use the uploaded file directly.
 
 It must NOT require `README.md`, `SKILL.md`, or the rest of the repository before the core workflow can run.
 
-If provider/model/level information is not visible, it may ask once for a screenshot or pasted model list as defined by the portable contract.
+If provider/model/level information is not visible, it should ask once for a screenshot or pasted model list as defined by the portable contract.
 
 ## Test D — provider catalog is unknown
 
@@ -104,10 +107,53 @@ Expected behavior:
 
 - ask for one screenshot of the model + reasoning/level picker OR an exact pasted list;
 - never invent model names;
-- build a session-local FAST/BALANCED/DEEP/MAX ladder after receiving the catalog;
+- build a session-local FAST/BALANCED/DEEP/MAX ladder only after receiving a verified catalog;
 - do not ask for the same catalog again during that session unless it changes.
 
-## Test E — escalation
+## Test E — active model known, full catalog unknown
+
+This is a regression test for a real failure observed during Claude testing.
+
+Prompt:
+
+```text
+Use TEMO Efficiency.
+You know which provider/current model this chat is using, but you cannot see my full live model picker or all selectable models.
+Build the correct routing state for this session.
+```
+
+### Expected PASS
+
+The assistant must NOT extrapolate alternative model names.
+
+It should return the equivalent of:
+
+```text
+CATALOG STATUS: PARTIAL
+ROUTING MODE: CURRENT_MODEL_ONLY
+FULL SELECTABLE CATALOG: UNKNOWN
+```
+
+and then ask once for a screenshot or exact pasted list of the picker if a full ladder is needed.
+
+### Hard FAIL — CATALOG_HALLUCINATION_FAIL
+
+Fail the test if the assistant says it cannot see the live model picker/catalog and then outputs exact alternative model names anyway.
+
+Examples of prohibited behavior:
+
+- inventing provider-family members or version numbers from memory;
+- claiming exact FAST/BALANCED/DEEP/MAX models without a verified catalog source;
+- claiming a reasoning/level control is absent when that absence is not verified.
+
+The source for a full ladder must be one of:
+
+- host/runtime selectable catalog metadata;
+- user screenshot;
+- user pasted exact list;
+- authoritative current first-party catalog applicable to the environment.
+
+## Test F — escalation
 
 Give a simple task first and confirm it uses FAST/low when appropriate. Then provide evidence that the same checkpoint has become genuinely ambiguous or cross-system.
 
@@ -123,8 +169,9 @@ Expected behavior:
 TEMO Efficiency is not being followed correctly if the assistant:
 
 - starts execution before provider/model/level discovery when discovery is actually needed;
-- makes the user choose a model when the skill has enough information to choose;
+- makes the user choose a model when the skill has enough verified information to choose;
 - invents model names, reasoning levels, boost modes, or controls;
+- knows only the current model but falsely claims a full verified catalog;
 - automatically chooses the strongest model for every task;
 - skips from FAST directly to MAX without evidence;
 - repeats already VERIFIED/PASS work without a relevant change;
