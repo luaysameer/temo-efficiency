@@ -1,0 +1,123 @@
+name: TEMO Efficiency Feedback
+description: Share a real routing, provider-discovery, portability, verification, or documentation result.
+title: "[TEMO Feedback] "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing TEMO Efficiency on a real workflow.
+        Please share only the minimum reproducible evidence. Do not include passwords, API keys, private tokens, personal information, or confidential code.
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language / اللغة
+      options:
+        - English
+        - العربية
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: provider
+    attributes:
+      label: AI provider / tool
+      description: ChatGPT, Codex, Claude, Claude Code, Gemini, Cursor, Cloud Code, local model, or other.
+      placeholder: e.g. ChatGPT
+    validations:
+      required: true
+
+  - type: input
+    id: temo_version
+    attributes:
+      label: TEMO Efficiency version
+      placeholder: e.g. 1.4.0
+
+  - type: dropdown
+    id: signal_type
+    attributes:
+      label: Feedback type
+      options:
+        - Model/profile routing
+        - Reasoning/level routing
+        - Provider/model discovery
+        - Catalog confidence / screenshot flow
+        - Bootstrap / GitHub / portable fallback
+        - Escalation behavior
+        - Verification / LOCKED_PASS
+        - Consumption/context efficiency
+        - Documentation / usability
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: catalog
+    attributes:
+      label: Available models / levels (optional)
+      description: Paste only the exact visible labels if relevant. Screenshots are optional.
+      placeholder: |
+        Models: ...
+        Levels/Thinking: ...
+        Boost/Speed: ...
+
+  - type: input
+    id: initial_route
+    attributes:
+      label: Initial TEMO route
+      placeholder: e.g. FAST / model X / Low
+
+  - type: input
+    id: escalation
+    attributes:
+      label: Escalation route (if any)
+      placeholder: e.g. FAST → BALANCED, or none
+
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - PASS
+        - PARTIAL
+        - FAIL
+    validations:
+      required: true
+
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened?
+      description: Keep it concise and reproducible.
+      placeholder: Describe the behavior you observed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: Describe the expected TEMO behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Minimal evidence
+      description: Redact secrets and private data. Do not paste full private conversations unless necessary and intentional.
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement (optional)
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed secrets, tokens, personal information, and confidential data from this report.
+          required: true
