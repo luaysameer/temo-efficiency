@@ -1,76 +1,52 @@
 ---
 name: temo-efficiency
-description: Provider-aware model routing and micro-checkpoint execution for AI agent workflows. Discovers the real provider/model/level catalog, chooses the smallest capable model and effort, shows the execution choice before every command, protects verified work, and escalates only when evidence requires it.
-version: 1.4.0
+description: Provider-aware model and reasoning-level routing for AI workflows. Discovers the real provider/catalog, chooses the smallest capable model/level, shows the execution choice before every command, protects verified work, refreshes canonical rules, and learns from opt-in evidence-based feedback.
+version: 1.5.0
 license: MIT
 ---
 
 # TEMO Efficiency
 
-TEMO Efficiency is an execution-routing skill for AI workflows. Its purpose is not merely to use a cheaper model. It makes the model + level choice explicit before execution, keeps acceptance criteria unchanged, prevents repeated verified work, and escalates only when the current checkpoint actually needs more capability.
+TEMO Efficiency is an execution-routing skill for AI workflows.
 
-## Mandatory bootstrap
+Its goal is to use the **smallest capable model + reasoning level** that can satisfy unchanged acceptance criteria, while reducing repeated context, unnecessary high-reasoning use, duplicate diagnostics/tests, and rework.
 
-Loading this `SKILL.md` is enough to activate the TEMO Efficiency workflow.
+It is provider-aware and portable across ChatGPT/OpenAI, Codex, Claude/Claude Code, Gemini, Cursor, Copilot, Cloud Code, local models, and other AI environments.
 
-If the canonical repository `luaysameer/temo-efficiency` is reachable, read the current canonical files before executing work:
+## 1. Mandatory startup
 
-1. `TEMO_BOOTSTRAP.md`
-2. current `SKILL.md`
-3. `docs/BEHAVIOR_CONTRACT.md`
-4. `config/model-ladder.example.yaml`
-5. `templates/PROVIDER_DISCOVERY.md`
-6. `templates/CATALOG_CONFIDENCE_GATE.md`
-7. `templates/EXECUTION_CHOICE.md`
-8. `templates/CHECKPOINT.md`
-9. `templates/EXECUTION_HEADER.md` only when execution is requested
+Loading this `SKILL.md` activates TEMO Efficiency.
 
-`docs/CROSS_DEVICE_TEST.md` defines the expected portable behavior and may be used to verify that the skill is being followed correctly in a fresh conversation or another device.
+If the canonical repository `luaysameer/temo-efficiency` is reachable:
 
-Do not repeatedly reload unchanged files in the same session. Preserve the provider/model mapping and all prior PASS/VERIFIED state.
+1. Read `TEMO_LATEST.md` once.
+2. If this loaded copy is older than the current manifest, load the current canonical `SKILL.md` before routing the first task.
+3. Read `TEMO_BOOTSTRAP.md` for access/fallback behavior.
+4. Use the current canonical templates/docs only as needed.
 
-If repository access is unavailable, continue from the loaded copy. Never invent missing provider identity, model names, levels, boost modes, or controls.
+Do not repeatedly refresh unchanged TEMO files during the same session.
 
-## Required user experience
+If the repository cannot be reached, continue with the loaded copy. Do not block the user's task only because an update check failed.
 
-The expected flow is:
+### Update model
 
-```text
-load TEMO Efficiency
-→ identify/confirm the AI provider/tool
-→ verify the real model + level catalog for this account/environment
-→ if catalog is not visible, request screenshot(s) or an exact pasted list
-→ build/reuse FAST/BALANCED/DEEP/MAX only from verified choices
-→ score the current checkpoint
-→ choose the exact model + level
-→ show EXECUTION CHOICE before execution
-→ execute one bounded micro-checkpoint
-→ verify against unchanged acceptance criteria
-→ LOCKED_PASS successful work
-→ escalate one step only when evidence requires it
-```
+TEMO can **refresh itself from the canonical repository** when access exists.
 
-If an agent jumps directly into execution without doing provider/model/level discovery when discovery is needed, makes the user guess the model when the catalog is known, invents provider/model names, or repeats already verified work, TEMO Efficiency is not being followed correctly.
+TEMO must **not silently rewrite the canonical GitHub repository** from an unrelated user's session. Improvements reach the project through reviewed maintainer changes, Issues, or Pull Requests.
 
-## Provider discovery comes first
+## 2. Provider discovery comes before exact routing
 
-Before choosing FAST / BALANCED / DEEP / MAX, determine the actual AI/tool environment unless it is already authoritatively known.
+Before choosing an exact model/level, determine the real AI/tool environment unless it is already authoritatively known.
 
-- If the active environment already exposes its provider, exact selectable model choices, reasoning/effort levels, speed/boost controls, and relevant consumption controls, use those directly.
-- Do not ask the user to repeat information the environment already exposes.
-- If the provider/tool is unknown, ask once which AI/tool they are using: ChatGPT/OpenAI, Codex, Claude/Claude Code, Gemini, Cursor, Copilot, Cloud Code, local models, or another AI tool.
-- If the user does not know the tool name, request one screenshot showing the app/site header, sidebar, or settings page.
-- If exact model names or levels are not visible, request screenshot(s) of the expanded model picker and reasoning/level picker, plus boost/speed/mode only if it exists and matters.
-- If screenshots are inconvenient, accept a pasted list of the exact visible labels.
-- Build a session-local ladder only from the verified real catalog and reuse it.
-- Do not ask again unless the provider, product surface, account tier, model catalog, or environment changes, or the supplied capture was incomplete.
-- Never fabricate a provider identity, model name, reasoning level, boost mode, consumption control, or provider capability.
+If the environment exposes the provider, full selectable model catalog, reasoning/effort controls, and relevant speed/boost controls, use them directly.
 
-### Screenshot fallback is mandatory when the catalog is uncertain
+Do not ask the user to repeat information already visible to the agent.
 
-If TEMO cannot verify the exact current choices, it must not build a full ladder from memory or assumptions.
+If the provider/tool is unknown, ask once which AI/tool is being used.
 
-Use the smallest screenshot request needed:
+If the user does not know the tool name, request one screenshot showing the app/site header, sidebar, or settings page.
+
+If the exact selectable models or levels are not visible, request the smallest screenshot set needed:
 
 ```text
 I can’t verify the exact model + level choices available on your current AI/account yet.
@@ -86,170 +62,137 @@ I’ll map them once and reuse the ladder for this session.
 
 If one screenshot shows everything, one screenshot is enough.
 
-Provider brand, account plan/tier, or one active model does not prove the full selectable catalog.
+## 3. Catalog Confidence Gate — mandatory
 
-### ChatGPT / OpenAI / Codex
+Provider name, plan/tier, or one active model does **not** prove the full selectable catalog.
 
-Use the current model and reasoning/effort controls exposed by the active environment when available.
+A full exact catalog may be treated as VERIFIED only when it comes from at least one of:
 
-Do not hardcode a permanent OpenAI model list because product catalogs and controls can change.
+- host/runtime metadata explicitly exposing selectable models/controls;
+- user screenshot(s) of the real picker;
+- user-pasted exact visible labels;
+- authoritative current first-party information demonstrably applicable to the user's exact environment/account surface.
 
-Do not assume different ChatGPT/OpenAI account tiers expose a particular model set. If exact current choices are not visible to the agent, request screenshots or an exact pasted list and map only those verified choices.
+Do not construct a catalog from:
 
-### Other providers/tools
+- model memory;
+- provider-family assumptions;
+- plan/tier assumptions;
+- guessed version numbers;
+- extrapolation from one active model;
+- stale/general documentation that does not establish the user's actual choices.
 
-For Claude / Claude Code, Gemini, Cursor, Copilot, Cloud Code, local models, or another environment:
-
-- use an authoritative visible/programmatic catalog when available;
-- otherwise request screenshots or an exact pasted list;
-- infer FAST/BALANCED/DEEP/MAX only from actual visible/supplied capabilities and provider labels;
-- if capability ordering is ambiguous, ask only the smallest missing clarification rather than guessing.
-
-Detailed discovery behavior is in `templates/PROVIDER_DISCOVERY.md` and the hard verification rule is in `templates/CATALOG_CONFIDENCE_GATE.md`.
-
-## Catalog confidence states
-
-Use one of these states:
-
-### VERIFIED_FULL
-
-Provider/tool, full selectable model catalog, and level/reasoning controls are verified. A full exact ladder may be built.
-
-### VERIFIED_CURRENT_ONLY
-
-Current model is verified, but alternatives are not.
-
-Use:
+If only the active model is verified:
 
 ```text
 CATALOG STATUS: PARTIAL
 ROUTING MODE: CURRENT_MODEL_ONLY
-CURRENT MODEL: <verified current model>
+CURRENT MODEL: <verified model>
 FULL SELECTABLE CATALOG: UNKNOWN
 ACTION: Request screenshot/list before recommending a different model.
 ```
 
-Do not invent alternatives.
+Do not invent a full FAST/BALANCED/DEEP/MAX ladder.
 
-### UNVERIFIED
+Hard failure:
 
-Provider/tool or selectable controls are not sufficiently verified.
+`CATALOG_HALLUCINATION_FAIL`
 
-Do not output an exact model recommendation or full ladder. Ask for the required screenshot(s) or pasted labels first.
+Use that classification when an agent admits it cannot see the live picker/catalog and then outputs exact alternative model names anyway.
 
-## Session-local model ladder
+## 4. Build the session-local ladder only after verification
 
-Only after `VERIFIED_FULL`, retain a mapping like:
+After the catalog passes the confidence gate, retain:
 
 ```text
 PROVIDER / TOOL: <actual environment>
 FAST MODEL: <smallest capable available model>
-FAST LEVEL: <lowest reliable available level>
+FAST LEVEL: <lowest reliable level>
 BALANCED MODEL: <normal/default coding-analysis model>
 BALANCED LEVEL: <medium/default reasoning>
 DEEP MODEL: <strong reasoning/coding model>
 DEEP LEVEL: <medium/high as supported>
 MAX MODEL: <strongest available model, exceptional use only>
 MAX LEVEL: <highest justified supported level>
-BOOST / SPEED CONTROL: <actual values or Not exposed>
-CONSUMPTION CONTROL: <actual values or Not exposed>
-SOURCE: <host metadata | screenshot(s) | pasted list | applicable first-party catalog>
+BOOST / SPEED CONTROL: <verified values or Not exposed>
+CONSUMPTION CONTROL: <verified values or Not exposed>
+SOURCE: <host metadata | screenshot | pasted list | applicable first-party catalog>
 CATALOG CONFIDENCE: VERIFIED
 ```
 
-Do not rediscover the same catalog in the same session unless it actually changes.
+Reuse this mapping for the session.
 
-## Mandatory pre-execution selection
+Do not ask again unless the provider, account/product surface, tier, model catalog, or environment changes, or the first capture was incomplete.
 
-Before every executable command, implementation prompt, debugging command, deployment command, file mutation instruction, device command, or copy/paste command for another agent, show this user-facing block first:
+## 5. Score the current checkpoint
 
-```text
-EXECUTION CHOICE
-Tool / Environment: <exact tool or environment>
-Model: <exact verified mapped model, or verified current model in CURRENT_MODEL_ONLY mode>
-Profile: <FAST | BALANCED | DEEP | MAX, or CURRENT_MODEL_ONLY if full ladder is unavailable>
-Level / Effort: <exact verified available level or Not exposed / not verified>
-Boost / Speed: <exact verified value, OFF when available and not justified, or Not exposed>
-Consumption: <lowest practical verified exposed setting or Not exposed>
-Deploy: <YES | NO>
-Reason: <one concise sentence explaining why this choice is sufficient>
+Score five dimensions from 0–2:
 
-Then copy and execute the command below.
-```
+- Complexity: local/simple 0, multi-file/logic 1, architecture/deep reasoning 2
+- Risk: reversible/local 0, production-visible 1, security/data/infrastructure critical 2
+- Scope: one narrow surface 0, several coupled surfaces 1, system-wide 2
+- Verification burden: trivial/static 0, targeted runtime/tests 1, live/manual/multi-environment 2
+- Uncertainty: known root cause 0, partial evidence 1, unclear/novel failure 2
 
-Rules:
-
-- Choose for the user when the real catalog is verified.
-- Never make the user guess which model or level to use when TEMO has enough verified information to choose.
-- If a control does not exist, write `Not exposed` only when that absence is verified.
-- If local USB, filesystem, GPU, desktop UI, or attached hardware is required, choose a local environment rather than cloud execution that cannot reach it.
-- If later evidence requires escalation, show a new `EXECUTION CHOICE` before the next command and preserve prior PASS/VERIFIED work.
-
-## Model routing
-
-Score the CURRENT checkpoint on five dimensions, each 0–2:
-
-- Complexity: local/simple (0), multi-file/logic (1), architecture/deep reasoning (2)
-- Risk: reversible/local (0), production-visible (1), security/data/infrastructure critical (2)
-- Scope: one narrow surface (0), several coupled surfaces (1), system-wide (2)
-- Verification burden: trivial/static (0), targeted runtime/tests (1), live/manual/multi-environment (2)
-- Uncertainty: known root cause (0), partial evidence (1), unclear/novel failure (2)
-
-Route by score:
+Route by total:
 
 - 0–2 → FAST / lowest reliable level
 - 3–5 → BALANCED / medium/default level
 - 6–8 → DEEP / medium or high as justified
 - 9–10 → MAX / highest justified level, exceptional use only
 
-Map these profiles to the actual verified provider catalog, not to a hardcoded brand or tier list.
+The score applies to the **current checkpoint**, not the importance of the entire project.
 
-## Escalation ladder
+## 6. Mandatory execution choice
 
-Escalation is strictly:
+Before every executable command, implementation prompt, debugging command, deployment command, device command, file mutation, or copy/paste command for another agent, show:
 
 ```text
-FAST → BALANCED → DEEP → MAX
+EXECUTION CHOICE
+Tool / Environment: <exact environment>
+Model: <exact verified mapped model, or verified current model>
+Profile: <FAST | BALANCED | DEEP | MAX | CURRENT_MODEL_ONLY>
+Level / Effort: <exact verified level or Not exposed / not verified>
+Boost / Speed: <verified value or Not exposed>
+Consumption: <lowest practical verified setting or Not exposed>
+Deploy: <YES | NO>
+Reason: <one concise reason>
+
+Then copy and execute the command below.
 ```
 
-Do not jump directly to the strongest model merely because it exists.
+Choose for the user when enough verified information exists. Do not make the user guess.
 
-Escalate when evidence shows the current checkpoint needs more capability, such as:
+## 7. Local vs cloud execution
 
-- root cause remains ambiguous after targeted diagnostics;
-- several coupled subsystems must be reasoned about together;
-- the unchanged acceptance test still fails;
-- security/data/infrastructure risk increased;
-- the current mapped model/profile could not complete the same bounded checkpoint.
+If the task requires local USB, Android ADB, filesystem access, GPU, desktop UI, a local browser session, or attached hardware, choose an execution environment that can physically reach it.
 
-When escalating:
+Do not choose a cloud environment that cannot access the required hardware.
 
-- keep useful diagnostics;
-- preserve previous PASS/VERIFIED state;
-- show a new `EXECUTION CHOICE`;
-- do not restart the investigation from zero.
+## 8. Micro-checkpoints
 
-## Micro-checkpoint contract
+Split large work into narrow checkpoints with one primary objective.
 
-Each execution checkpoint should contain:
+Each execution checkpoint should state:
 
 - Tool/environment
-- Exact verified mapped model and TEMO profile
-- Exact level/effort if exposed
-- Consumption/boost controls if exposed
-- One primary objective
-- Protected / do-not-repeat work
-- Only the diagnostics/tests needed for this failure class
-- Measurable success condition
-- Exact stop condition
+- exact model + TEMO profile
+- exact level/effort if exposed
+- boost/consumption if exposed
+- objective
+- protected / do-not-repeat work
+- targeted diagnostics/tests
+- implementation boundary
+- measurable success condition
+- stop condition
 - Deploy YES/NO
-- Final report shape
+- final report shape
 
-Keep checkpoints narrow. Do not broaden the task merely because more context is available.
+Do not opportunistically expand the task.
 
-## Mandatory execution header
+## 9. Mandatory execution header
 
-When the user actually wants execution, the implementation prompt should contain:
+When the user actually wants execution, use:
 
 ```text
 EXECUTE THIS CHECKPOINT NOW. START IMPLEMENTATION IMMEDIATELY. DO NOT ASK ME WHAT TO DO.
@@ -257,60 +200,124 @@ EXECUTE THIS CHECKPOINT NOW. START IMPLEMENTATION IMMEDIATELY. DO NOT ASK ME WHA
 THIS IS AN IMPLEMENTATION COMMAND, NOT A REVIEW REQUEST. COMPLETE THE CHECKPOINT, RUN THE REQUIRED TESTS, DEPLOY IF ALLOWED AND PASSING, THEN RETURN THE REQUESTED FINAL REPORT. BEGIN NOW.
 ```
 
-The user-facing `EXECUTION CHOICE` must appear before this implementation header.
+The user-facing `EXECUTION CHOICE` must appear before this header.
 
-## PASS / VERIFIED protection
-
-After a meaningful success, protect the exact proven contract as:
-
-```text
-LOCKED_PASS
-```
-
-Do not repeat it unless the relevant code, dependency, environment, provider catalog, requirement, or acceptance contract changed, or later evidence contradicts it.
-
-After an important bug fix, add the smallest practical regression guard so the same failure is not paid for twice.
-
-## Verification rule
+## 10. Verification and PASS protection
 
 Efficiency never means lowering acceptance criteria.
 
-Use evidence appropriate to the claim:
+Match evidence to the claim:
 
-- static/code claim → syntax/static checks
-- functional logic → targeted tests
-- integration claim → integration test against the real boundary when safe
-- UI/runtime claim → real rendered/browser/device evidence when available
+- static/code claim → syntax/static check
+- functional logic → targeted automated tests
+- integration claim → real boundary/integration test when safe
+- UI/runtime/device claim → actual rendered/runtime/device evidence
 - production claim → production/live acceptance evidence
 
-`IMPLEMENTED` is not `VERIFIED`. Do not claim verification without the required acceptance evidence.
+`IMPLEMENTED` is not `VERIFIED`.
 
-## Context efficiency
+After meaningful success, protect the exact proven contract as:
+
+`LOCKED_PASS`
+
+Do not repeat it unless relevant code, dependency, environment, provider catalog, requirement, acceptance contract, or later evidence changes.
+
+After an important bug fix, add the smallest practical regression guard.
+
+## 11. Escalation
+
+Escalation is strictly:
+
+`FAST → BALANCED → DEEP → MAX`
+
+Escalate one step only when evidence justifies it, such as:
+
+- root cause remains ambiguous after targeted diagnostics;
+- multiple coupled systems must be reasoned about together;
+- the unchanged acceptance test still fails;
+- security/data/infrastructure risk increased;
+- the current mapped model/level could not complete the same bounded checkpoint.
+
+When escalating:
+
+- preserve useful diagnostics;
+- preserve PASS/VERIFIED state;
+- show a new `EXECUTION CHOICE`;
+- do not restart from zero.
+
+## 12. Context efficiency
 
 Before sending large context to a stronger model:
 
-1. remove already verified history that does not affect the current checkpoint;
-2. keep the exact blocker, relevant files/functions, protected tests, acceptance criteria, and session-local provider ladder;
-3. reuse concise handoff files instead of replaying whole conversations;
-4. do not rediscover the provider/model catalog unless it changed.
+1. remove verified history irrelevant to the current checkpoint;
+2. keep the exact blocker, relevant files/functions, protected tests, acceptance criteria, and provider ladder;
+3. reuse concise handoffs instead of replaying entire conversations;
+4. do not rediscover the provider catalog unless it changed.
 
-## Portable activation in another conversation/device
+## 13. Feedback loop — opt in only
 
-A user can activate TEMO Efficiency in a fresh supported AI conversation with repository access by saying:
+TEMO Efficiency does **not** silently upload telemetry, conversations, screenshots, prompts, code, logs, provider catalogs, or account details.
 
-```text
-Use TEMO Efficiency from https://github.com/luaysameer/temo-efficiency
-Load the current SKILL.md and TEMO_BOOTSTRAP.md, follow them as the execution behavior contract for this chat, and do not execute my task until you have completed the provider/model/level discovery required by the skill.
-```
+When a meaningful signal occurs, the agent may prepare a compact `TEMO FEEDBACK` candidate.
 
-If repository navigation fails, use the single-file portable fallback:
+Useful signals include:
+
+- routing too strong or too weak;
+- unnecessary escalation;
+- provider/catalog discovery failure;
+- `CATALOG_HALLUCINATION_FAIL`;
+- bootstrap/portable fallback failure;
+- a new provider/control TEMO does not map well;
+- regression protection that prevented repeated work;
+- documentation/usability problems;
+- meaningful cross-device PASS/FAIL results.
+
+Use `docs/FEEDBACK_LOOP.md` when repository access exists.
+
+Do not ask for feedback after every trivial task.
+
+The user decides whether to submit the report.
+
+If GitHub issue creation is available, submit only after explicit user approval. Otherwise return the report ready to paste into the repository's TEMO Feedback issue form.
+
+Before submission, remove secrets, tokens, personal identifiers, private URLs, confidential code, and unnecessary full-conversation content.
+
+## 14. Portable fallback
+
+If repository navigation/search fails once, do not loop.
+
+Try:
 
 `https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md`
 
-If the AI environment cannot access the web, upload or paste `TEMO_PORTABLE.md` once.
+If external web access is unavailable, one uploaded/pasted `TEMO_PORTABLE.md` is enough for the core workflow.
 
-Use `docs/CROSS_DEVICE_TEST.md` to verify the expected behavior on another phone, computer, browser, or provider.
+## 15. Final report
 
-## Credit-safety claim
+At the checkpoint boundary, report compactly:
 
-TEMO Efficiency does not bypass quotas, billing, rate limits, subscription rules, or safety controls, and it cannot guarantee a fixed percentage of savings. Its purpose is to reduce avoidable work by routing to the smallest capable verified model/level, minimizing repeated context and tests, and protecting verified results without weakening acceptance quality.
+```text
+RESULT: PASS / PARTIAL / FAIL
+ROOT CAUSE: <if applicable>
+MODEL / PROFILE / LEVEL USED:
+CATALOG STATUS: VERIFIED_FULL / VERIFIED_CURRENT_ONLY / UNKNOWN
+CHANGES:
+TESTS:
+VERIFICATION STATUS:
+LOCKED_PASS:
+BLOCKERS:
+NEXT:
+FEEDBACK SIGNAL: NONE / OPTIONAL_CANDIDATE
+```
+
+Stop at the checkpoint boundary.
+
+## 16. What TEMO does not do
+
+TEMO Efficiency does not bypass quotas, billing, subscriptions, plan restrictions, rate limits, or safety controls.
+
+It does not guarantee a fixed saving percentage.
+
+It does not silently self-modify the canonical repository from arbitrary user sessions.
+
+Its purpose is to reduce avoidable AI work while preserving the required quality bar.
