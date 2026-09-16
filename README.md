@@ -113,11 +113,41 @@ The repository intentionally does not permanently hardcode one OpenAI model list
 
 If the exact current choices are not visible to the AI, TEMO asks once for a screenshot or pasted list and maps the real choices.
 
+## Reliable even when GitHub search fails
+
+Some AI providers can open GitHub repositories directly. Others can browse the web but cannot reliably resolve a repository through search/indexing. Some have no external web access at all.
+
+TEMO Efficiency now has three official access paths:
+
+```text
+A. Full repository access
+   → load the canonical files normally
+
+B. Repository search/navigation fails
+   → stop retrying after one failure
+   → fetch the single raw portable file:
+     https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
+
+C. No web access
+   → upload/paste TEMO_PORTABLE.md once
+   → run the full core workflow from that one file
+```
+
+[`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) is self-contained. If it is already loaded, the AI must **not** require the rest of the repository before using the core TEMO workflow.
+
+This fallback was added after a real cross-provider test showed that one AI could use the repository while another spent time trying to locate it and then asked for the skill manually.
+
+The bootstrap itself follows TEMO Efficiency: **one failed repository lookup is enough to fall back**. Do not waste time repeatedly searching/indexing the same repository.
+
 ## Load one file — bootstrap the workflow
 
-Loading either this `README.md` or [`SKILL.md`](SKILL.md) is enough to enter the TEMO workflow **when the AI can access this repository**.
+You have three valid entrypoints:
 
-The canonical bootstrap is:
+- [`README.md`](README.md) when repository access works;
+- [`SKILL.md`](SKILL.md) when loading the formal skill contract;
+- [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) for a single-file portable/offline/no-browse setup.
+
+When full repository access works, the canonical bootstrap is:
 
 1. [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md)
 2. [`SKILL.md`](SKILL.md)
@@ -132,16 +162,23 @@ Do not repeatedly reload unchanged files during the same session.
 
 ## Quick activation in a new ChatGPT / AI conversation
 
-Paste this:
+Paste this compact activator:
 
 ```text
-Use TEMO Efficiency from https://github.com/luaysameer/temo-efficiency
-Load the current SKILL.md and TEMO_BOOTSTRAP.md, follow them as the execution behavior contract for this chat, and do not execute my task until you have completed the provider/model/level discovery required by the skill.
+Use TEMO Efficiency.
+First try: https://github.com/luaysameer/temo-efficiency
+If repository search/navigation fails, do NOT keep retrying it. Immediately load:
+https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
+Then follow TEMO Efficiency for my next task.
 ```
 
-Then give the task.
+If that AI has no external web access, upload **only `TEMO_PORTABLE.md`** and say:
 
-If that AI cannot access GitHub, upload/provide the relevant TEMO skill files instead. A public GitHub repository cannot automatically inject itself into an unrelated AI conversation unless the AI is given the repository/files and can read them.
+```text
+Use the attached TEMO_PORTABLE.md as the TEMO Efficiency behavior contract for this chat.
+```
+
+A public GitHub repository cannot automatically inject itself into an unrelated AI conversation unless the AI is given the repository/link/file and can read it.
 
 ## Test it on another phone or computer
 
@@ -149,7 +186,11 @@ A complete fresh-session test is included in:
 
 [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md)
 
-Use it to verify that another ChatGPT session or another supported AI environment follows the same behavior.
+It now tests three real portability modes:
+
+- full repository access;
+- GitHub search/navigation failure with raw-file fallback;
+- no external web access with one uploaded portable file.
 
 A correct run should:
 
@@ -158,7 +199,8 @@ A correct run should:
 - show `EXECUTION CHOICE` before the command;
 - use a narrow checkpoint first;
 - preserve previous PASS results;
-- escalate one step only when evidence requires it.
+- escalate one step only when evidence requires it;
+- avoid repeated GitHub search loops after an access failure.
 
 ## Model routing
 
@@ -235,7 +277,7 @@ If work requires local USB, filesystem access, GPU, desktop UI, or attached hard
 
 ## Quick Start
 
-1. Load [`SKILL.md`](SKILL.md) or this README.
+1. Load [`SKILL.md`](SKILL.md), this README, or [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md).
 2. Let TEMO discover/reuse the real provider model + level catalog.
 3. Give it a task and acceptance criteria.
 
@@ -243,7 +285,8 @@ Copy/paste starter:
 
 ```text
 Use the latest TEMO Efficiency rules from luaysameer/temo-efficiency.
-Bootstrap the canonical workflow if repository access is available.
+If normal repository access fails, fall back once to:
+https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
 Discover or reuse my actual AI provider/model/level catalog before choosing an exact model.
 Before every execution command, show the recommended Tool / Model / Profile / Level / Boost / Consumption / Deploy choice and one short reason.
 Choose for me when the environment is known; do not make me guess the model or level.
@@ -258,7 +301,8 @@ Protected / do not change: <known PASS areas or limits>
 ## Documentation
 
 - [`SKILL.md`](SKILL.md) — normative skill behavior
-- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — canonical bootstrap sequence
+- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — canonical bootstrap + fallback sequence
+- [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) — self-contained single-file fallback
 - [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md) — what the skill must do
 - [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md) — verify behavior on another device/session/provider
 - [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md) — provider/model/level discovery
