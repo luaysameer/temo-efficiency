@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "temo-feedback-gateway",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-16",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "GITHUB_OWNER": "luaysameer",
+    "GITHUB_REPO": "temo-efficiency",
+    "GATEWAY_VERSION": "0.1.0"
+  },
+  "secrets": {
+    "required": ["GITHUB_TOKEN"]
+  },
+  "ratelimits": [
+    {
+      "name": "CLIENT_RATE_LIMITER",
+      "namespace_id": "9515001",
+      "simple": {
+        "limit": 6,
+        "period": 60
+      }
+    },
+    {
+      "name": "GLOBAL_RATE_LIMITER",
+      "namespace_id": "9515002",
+      "simple": {
+        "limit": 120,
+        "period": 60
+      }
+    }
+  ]
+}
