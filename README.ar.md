@@ -3,35 +3,55 @@
 [![GitHub stars](https://img.shields.io/github/stars/luaysameer/temo-efficiency?style=social)](https://github.com/luaysameer/temo-efficiency/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**TEMO Efficiency** هي طريقة لتوجيه الموديلات ومستويات التفكير وتنفيذ العمل عبر Micro-Checkpoints في مختلف أدوات الذكاء الاصطناعي. الفكرة: لا تستخدم أقوى موديل وأعلى Level بشكل تلقائي؛ اكتشف البيئة الحقيقية، اختر أقل قدرة تكفي المهمة، احتفظ بما اجتاز الاختبار، وصعّد فقط عندما يثبت الدليل أن المستوى الحالي غير كافٍ.
+**TEMO Efficiency** هي مهارة لتوجيه التنفيذ بين الموديلات ومستويات التفكير المختلفة. قبل أي تنفيذ، تحدد الأداة المناسبة، والموديل المناسب، والـLevel المناسب، ثم تعرض الاختيار للمستخدم قبل الأمر.
 
-> Use the smallest capable model. Preserve the acceptance criteria. Escalate only when evidence says you need to.
+الفكرة الأساسية:
 
-إذا كانت الفكرة مفيدة لعملك، **[ضع Star للمشروع](https://github.com/luaysameer/temo-efficiency)** وشارك نتيجة تجربة حقيقية.
+> استخدم أصغر موديل ومستوى يستطيعان إنجاز الـCheckpoint بنفس معايير القبول، وصعّد فقط عندما يثبت الدليل أن المستوى الحالي غير كافٍ.
 
-## ملف واحد يكفي للبدء
+## شنو تسوي المهارة من تستخدمها؟
 
-تحميل `README.md` أو [`SKILL.md`](SKILL.md) يكفي لتفعيل TEMO Efficiency.
+السلوك المطلوب هو:
 
-إذا كان الـAgent يستطيع الوصول إلى GitHub، يجب أن يعمل Bootstrap للنسخة الحالية من المشروع قبل التنفيذ ويقرأ:
+```text
+تحميل TEMO Efficiency
+→ اكتشاف/تأكيد الذكاء الاصطناعي المستخدم
+→ معرفة الموديلات والـLevels الحقيقية المتاحة
+→ بناء FAST / BALANCED / DEEP / MAX
+→ تقييم الـCheckpoint الحالية
+→ اختيار الموديل + المستوى
+→ إظهار الاختيار قبل التنفيذ
+→ تنفيذ Micro-Checkpoint محددة
+→ التحقق من النتيجة
+→ حماية PASS / VERIFIED
+→ التصعيد مستوى واحد فقط إذا الدليل يبرر ذلك
+```
 
-1. [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md)
-2. [`SKILL.md`](SKILL.md)
-3. [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml)
-4. [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md)
-5. [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md)
-6. [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md)
-7. [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) عند وجود تنفيذ فعلي
+التفاصيل الملزمة موجودة في [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md).
 
-بعد قراءة هذه الملفات مرة، لا يعيد تحميلها أو يسأل عن نفس المعلومات ما دامت لم تتغير.
+## قبل كل أمر لازم يظهر الاختيار
 
-إذا لم يكن الوصول إلى GitHub متاحاً، يستخدم النسخة المحملة ولا يخترع أسماء موديلات أو Levels أو خيارات غير موجودة.
+قبل أي أمر تنفيذي، المفروض تشوف شيء مثل:
 
-## أولاً: اكتشف أي ذكاء اصطناعي يستخدمه الشخص
+```text
+EXECUTION CHOICE
+Tool / Environment: Codex Local
+Model: <اسم الموديل الحقيقي المختار>
+Profile: FAST
+Level / Effort: <المستوى الحقيقي المتاح>
+Boost / Speed: OFF أو Not exposed
+Consumption: Low أو Not exposed
+Deploy: NO
+Reason: هذه المهمة فحص محدد ولا تحتاج موديل أثقل.
 
-قبل اختيار FAST / BALANCED / DEEP / MAX، تحدد TEMO Efficiency البيئة الحقيقية.
+Then copy and execute the command below.
+```
 
-قد تكون:
+إذا TEMO تعرف الموديلات والـLevels الموجودة عندك، هي تختار لك وما تخليك تخمّن.
+
+## تعمل مع ChatGPT وغيره
+
+المهارة مو مرتبطة بمزود واحد. تقدر تتعامل مع:
 
 - ChatGPT / OpenAI
 - Codex
@@ -41,116 +61,80 @@
 - Copilot
 - Cloud Code
 - موديلات محلية
-- أو أي أداة ذكاء اصطناعي أخرى
+- أي أداة ذكاء اصطناعي أخرى
 
-إذا كانت البيئة والموديلات ومستويات Reasoning/Thinking ظاهرة للـAgent بشكل موثوق، يستخدمها مباشرة ولا يسأل المستخدم عن شيء يعرفه بالفعل.
+إذا البيئة تكشف الموديلات والـLevels الحالية للـAgent بشكل موثوق، يستخدمها مباشرة.
 
-إذا لم تكن معروفة، يسأل مرة واحدة عن اسم الأداة. وإذا لم تكن الموديلات أو المستويات ظاهرة، يطلب واحداً من اثنين:
+إذا ما يقدر يشوفها، يسأل مرة واحدة عن:
 
-- صورة واحدة لقائمة الموديلات + Levels/Reasoning، أو
-- كتابة أسماء الموديلات والمستويات كما تظهر بالضبط.
+- اسم الأداة/الذكاء، و
+- صورة لقائمة Model + Level/Reasoning، أو كتابة الأسماء كما تظهر بالضبط.
 
-بعدها يبني Model Ladder خاصة بهذه الجلسة ويحتفظ بها:
-
-```text
-FAST      -> أخف موديل موثوق + أقل Level مناسب
-BALANCED  -> موديل العمل العام/البرمجة + Level متوسط
-DEEP      -> موديل أقوى للتحليل والـDebug المعقد + Medium/High
-MAX       -> أقوى موديل متاح + أعلى Level مبرر فقط للحالات الاستثنائية
-```
-
-لا يعيد السؤال عن الموديلات في نفس المحادثة إلا إذا تغيّر المزود أو الحساب أو ظهرت موديلات جديدة أو كانت الصورة الأولى ناقصة.
-
-التفاصيل في [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md).
-
-## إذا قال المستخدم ChatGPT / OpenAI / Codex
-
-تستخدم TEMO Efficiency **الموديلات ومستويات التفكير الحالية التي تكشفها البيئة نفسها** إذا كانت ظاهرة.
-
-لا نخزن قائمة OpenAI ثابتة داخل المشروع لأن أسماء الموديلات وخصائص المنتج ممكن تتغير مستقبلاً.
-
-إذا كانت البيئة لا تكشف الخيارات الحالية للـAgent، يطلب صورة أو قائمة مرة واحدة، ثم يربطها بـFAST/BALANCED/DEEP/MAX ويستخدمها لباقي الجلسة.
-
-## إذا كان يستخدم Claude أو Gemini أو Cloud Code أو غيره
-
-نفس الفكرة تماماً:
-
-- إذا الكتالوج ظاهر للـAgent، يستخدمه.
-- إذا غير ظاهر، يطلب صورة أو قائمة أسماء.
-- يقرأ أسماء الموديلات وLevels والـBoost أو Speed المتاح إن وجد.
-- لا يخترع خياراً غير موجود.
-- إذا ترتيب قوة الموديلات غير واضح، يسأل فقط عن المعلومة الناقصة بدلاً من التخمين.
-
-## الاختيار يظهر قبل كل تنفيذ
-
-قبل أي أمر تنفيذي، TEMO Efficiency تعرض للمستخدم ما يجب اختياره بوضوح:
+بعدها يبني Model Ladder لهذه الجلسة:
 
 ```text
-EXECUTION CHOICE
-Tool / Environment: <الأداة الحقيقية>
-Model: <اسم الموديل الحقيقي المختار>
-Profile: <FAST | BALANCED | DEEP | MAX>
-Level / Effort: <المستوى الحقيقي المتاح أو Not exposed>
-Boost / Speed: <القيمة الحقيقية أو Not exposed>
-Consumption: <القيمة الحقيقية أو Not exposed>
-Deploy: <YES | NO>
-Reason: <سبب مختصر لماذا هذا الاختيار يكفي>
-
-Then copy and execute the command below.
+FAST      → أخف موديل موثوق + أقل Level مناسب
+BALANCED  → موديل العمل العام + Level متوسط
+DEEP      → موديل أقوى للتحليل والـDebug المعقد
+MAX       → أقوى موديل + أعلى Level مبرر فقط للحالات الاستثنائية
 ```
 
-يعني المستخدم لا يبقى يخمّن: "أي موديل أختار؟ أي Level؟" إذا TEMO Efficiency عندها معلومات كافية، هي تختار له مباشرة.
+ولا يعيد نفس السؤال في نفس الجلسة إلا إذا تغيرت البيئة أو الموديلات أو الحساب.
 
-وإذا فشل المستوى الحالي بسبب دليل حقيقي، يظهر اختيار جديد بالموديل/المستوى الأعلى قبل الأمر التالي، مع الحفاظ على كل `PASS / VERIFIED` السابق.
+## ChatGPT / OpenAI / Codex
 
-## البدء السريع
+إذا كنت تستخدم ChatGPT أو OpenAI أو Codex، TEMO تعتمد الموديلات ومستويات التفكير **الحالية** الظاهرة في البيئة.
 
-1. حمّل هذا `README` أو [`SKILL.md`](SKILL.md).
-2. خَلِّ TEMO Efficiency تعمل Bootstrap وتكتشف الأداة والموديلات والمستويات الحقيقية.
-3. أعطها المهمة بهذا الشكل:
+ما نخزن قائمة OpenAI ثابتة داخل المشروع لأن أسماء الموديلات والخيارات ممكن تتغير.
+
+إذا الخيارات الحالية غير ظاهرة للـAgent، يطلب صورة أو قائمة مرة واحدة ثم يربطها بـFAST/BALANCED/DEEP/MAX.
+
+## ملف واحد يكفي للبدء
+
+إذا الـAgent عنده وصول للمشروع، تحميل `README.md` أو [`SKILL.md`](SKILL.md) يكفي حتى يبدأ الـBootstrap ويقرأ الملفات الحالية:
+
+1. [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md)
+2. [`SKILL.md`](SKILL.md)
+3. [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md)
+4. [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml)
+5. [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md)
+6. [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md)
+7. [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md)
+8. [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) عند التنفيذ الفعلي
+
+## شلون أشغلها بمحادثة جديدة أو هاتف ثاني؟
+
+افتح محادثة جديدة والصق:
 
 ```text
-Use the latest TEMO Efficiency rules from luaysameer/temo-efficiency.
-Bootstrap the canonical workflow if repository access is available.
-Discover or reuse my actual AI provider/model/level catalog before choosing an exact model.
-Before every execution command, show me the recommended Tool / Model / Profile / Level / Boost / Consumption / Deploy choice and one short reason.
-Choose for me when the environment is known; do not make me guess the model or level.
-Score the current task, choose FAST / BALANCED / DEEP / MAX, and explain the route.
-Create and execute one narrow micro-checkpoint. Preserve existing acceptance criteria and previous PASS states.
-Run verification proportional to the change surface, add a regression guard when practical, and escalate only when diagnostics justify it.
-Stop at the checkpoint boundary and report the evidence.
-
-Task: <describe the task>
-Acceptance criteria: <state the required result>
-Protected / do not change: <state known PASS areas or scope limits>
+Use TEMO Efficiency from https://github.com/luaysameer/temo-efficiency
+Load the current SKILL.md and TEMO_BOOTSTRAP.md, follow them as the execution behavior contract for this chat, and do not execute my task until you have completed the provider/model/level discovery required by the skill.
 ```
 
-## مثال سريع
+وبعدها اكتب مهمتك.
 
-بدون TEMO Efficiency:
+إذا الذكاء المستخدم ما يقدر يفتح GitHub، لازم ترفع له ملفات المهارة أو تلصقها. GitHub وحده ما يگدر يفرض نفسه تلقائياً داخل محادثة منفصلة إذا ما تم إعطاء الرابط/الملفات أو ما عندها صلاحية للوصول.
 
-```text
-المستخدم عنده 6 موديلات و4 مستويات تفكير.
-يختار أقوى موديل + High لكل شيء.
-الـAgent يعيد كل السياق وكل الاختبارات.
-```
+## اختبارها على جهاز ثاني
 
-مع TEMO Efficiency:
+استخدم:
 
-```text
-1. تعرف الأداة الحقيقية والموديلات المتاحة.
-2. تحفظ الكتالوج للجلسة.
-3. تقيس صعوبة المهمة.
-4. تقول للمستخدم بالضبط: Tool + Model + Profile + Level + Boost + Consumption + Deploy + Reason.
-5. تنفذ Micro-Checkpoint واحدة.
-6. تعمل Targeted Verification.
-7. تحمي PASS.
-8. تصعّد فقط إذا التشخيص يبرر ذلك.
-```
+[`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md)
+
+هذا الملف يعطيك اختبار جاهز لمحادثة جديدة ويحدد شنو يعتبر PASS وشنو يعتبر FAIL.
+
+الـPASS الصحيح يعني:
+
+- يكتشف أو يعرف الـProvider والموديلات فقط إذا يحتاج؛
+- يختار الموديل والـLevel بدلاً منك عندما عنده معلومات كافية؛
+- يعرض `EXECUTION CHOICE` قبل الأمر؛
+- يبدأ بأصغر Profile مناسب؛
+- ما يعيد الشغل الذي صار PASS؛
+- يصعد فقط `FAST → BALANCED → DEEP → MAX` وبالدليل.
 
 ## نظام التوجيه
 
-كل بُعد يأخذ 0 إلى 2:
+كل Checkpoint تنحسب على خمس نقاط، كل وحدة 0–2:
 
 - Complexity
 - Risk
@@ -160,55 +144,61 @@ Protected / do not change: <state known PASS areas or scope limits>
 
 ثم:
 
-| الدرجة | Profile | المستوى الافتراضي | الاستخدام |
+| الدرجة | Profile | المستوى المعتاد | الاستخدام |
 |---:|---|---|---|
-| 0–2 | **FAST** | Low | عمل صغير، حتمي، سهل التحقق |
-| 3–5 | **BALANCED** | Medium | تنفيذ مركز وDebug طبيعي |
-| 6–8 | **DEEP** | Medium / High | Regression صعب أو عدة أنظمة مترابطة |
-| 9–10 | **MAX** | High | تعقيد أو مخاطرة استثنائية |
+| 0–2 | **FAST** | أقل Level موثوق | عمل حتمي صغير وفحص محدود |
+| 3–5 | **BALANCED** | Medium/default | تنفيذ مركز وDebug طبيعي |
+| 6–8 | **DEEP** | Medium/High | مشاكل صعبة وأنظمة مترابطة |
+| 9–10 | **MAX** | أعلى مستوى مبرر | حالات استثنائية عالية التعقيد/المخاطر |
 
-الـProfile لا يساوي اسم موديل ثابت. بعد Provider Discovery، يتم ربط كل Profile بالموديل الحقيقي المناسب في البيئة الحالية.
+الـProfile مو اسم موديل ثابت. TEMO تربطه بالموديلات الحقيقية الموجودة عند الشخص.
 
-التصعيد يكون فقط:
+## حماية العمل الناجح
 
-`FAST → BALANCED → DEEP → MAX`
-
-ولا يتم القفز مباشرة إلى MAX.
-
-## كيف يحافظ على الجودة؟
-
-- معايير القبول لا تتغير لتقليل الاستهلاك.
-- الموديلات والمستويات تُكتشف من البيئة الحقيقية ولا تُخمن.
-- يرى المستخدم الموديل والـLevel قبل التنفيذ.
-- كل Micro-Checkpoint لها هدف واحد وحد توقف واضح.
-- الاختبارات المستهدفة تستخدم للتغيير الضيق.
-- يتم توسيع الاختبار فقط عندما يتغير عقد مشترك أو Schema أو Security Boundary أو أساس نشر.
-- `IMPLEMENTED` لا تعني `VERIFIED`.
-- بعد إصلاح خلل مهم نضيف Regression Guard صغير عند الإمكان.
-- لا نعيد أي PASS إلا إذا تغيّر ما يؤثر عليه.
-
-## Regression Lock
+بعد نجاح مهم، يتحول إلى:
 
 ```text
-تشخيص → إصلاح → Targeted Test → Regression Guard → نشر إذا كان مسموحاً → قبول حقيقي → Protect PASS
+LOCKED_PASS
 ```
 
-## الملفات الأساسية
+ما يتكرر إلا إذا تغير الكود أو البيئة أو الاعتماد أو الموديلات أو المتطلبات المرتبطة به، أو ظهر دليل جديد يناقضه.
 
-- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — نقطة تشغيل شاملة من README أو SKILL
-- [`SKILL.md`](SKILL.md) — القواعد الملزمة
-- [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md) — اكتشاف الذكاء والموديلات والـLevels
-- [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md) — اختيار الموديل والـLevel قبل التنفيذ
+## الجودة ما تنخفض
+
+TEMO Efficiency ما توفر الاستهلاك عن طريق تقليل الجودة.
+
+معايير القبول تبقى نفسها. التوفير يكون عن طريق:
+
+- موديل أصغر عندما يكفي؛
+- Level أقل عندما يكفي؛
+- سياق أقل؛
+- اختبارات مستهدفة؛
+- عدم تكرار التشخيص؛
+- حماية PASS؛
+- التصعيد فقط عندما يكون ضروري.
+
+`IMPLEMENTED` لا تعني `VERIFIED`.
+
+## Local أو Cloud
+
+إذا المهمة تحتاج USB أو ملفات محلية أو GPU أو واجهة سطح مكتب أو جهاز مربوط بالحاسبة، TEMO لازم تختار Local execution، مو Cloud ما يقدر يوصل للجهاز.
+
+## الملفات المهمة
+
+- [`SKILL.md`](SKILL.md) — القواعد الملزمة للمهارة
+- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — آلية تحميل المنظومة
+- [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md) — شنو لازم تسوي المهارة بالضبط
+- [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md) — اختبارها بمحادثة/جهاز ثاني
+- [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md) — اكتشاف الموديلات والـLevels
+- [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md) — اختيار التنفيذ قبل الأمر
 - [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md) — عقد Micro-Checkpoint
-- [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) — رأس أمر التنفيذ
-- [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml) — إعداد Model Ladder ثابت لمن يريد ذلك
-- [`examples/EXAMPLES.md`](examples/EXAMPLES.md) — حالات عملية
-- [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — قياس الاستهلاك والقبول
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — دليل المساهمة
+- [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml) — Model Ladder اختياري ثابت
 - [`README.md`](README.md) — النسخة الإنجليزية
 
-TEMO Efficiency لا تتجاوز الحصص أو الفوترة أو Rate Limits أو ضوابط الأمان، ولا تضمن نسبة توفير ثابتة. الهدف هو تقليل العمل القابل للتجنب مع الحفاظ على نفس معيار القبول.
+## ملاحظة مهمة
 
-## الترخيص
+TEMO Efficiency لا تتجاوز الحصص أو الفوترة أو Rate Limits أو ضوابط الأمان، وما تضمن نسبة توفير ثابتة. الهدف هو تقليل العمل غير الضروري مع الحفاظ على نفس معايير القبول.
 
-MIT — استخدمها، عدلها، وطورها.
+## License
+
+MIT — استخدمها، عدلها، جرّبها، وطوّرها.
