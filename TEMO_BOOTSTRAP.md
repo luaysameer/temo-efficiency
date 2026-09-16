@@ -1,196 +1,178 @@
 # TEMO Efficiency — Universal Bootstrap
 
-Loading either `README.md`, `SKILL.md`, or `TEMO_PORTABLE.md` is enough to start TEMO Efficiency.
+Loading `README.md`, `SKILL.md`, or `TEMO_PORTABLE.md` is enough to start TEMO Efficiency.
 
-Canonical repository:
-
-`luaysameer/temo-efficiency`
+Canonical repository: `luaysameer/temo-efficiency`
 
 Portable raw entrypoint:
 
 `https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md`
 
-## Access modes — use the first one that works
+## 1. Refresh once at session start
 
-TEMO Efficiency must not depend on one AI provider having perfect GitHub repository browsing.
+If the canonical repository is reachable, read `TEMO_LATEST.md` once before routing the first task.
 
-### Mode A — repository-aware agent
+- Compare the loaded TEMO version with the current manifest.
+- If the loaded copy is older, load the current canonical `SKILL.md` or `TEMO_PORTABLE.md` before execution.
+- Do not repeatedly refresh during the same session unless the user explicitly asks.
+- Preserve the current provider catalog and all PASS/VERIFIED work while refreshing rules.
+- If the update check fails, continue with the loaded copy and do not block the task.
 
-If the canonical repository is directly accessible, read the current canonical files before executing work:
+This is TEMO's update model: **refresh the rules from the canonical repository**, not silently rewrite the repository from a user's session.
 
-1. `SKILL.md`
-2. `docs/BEHAVIOR_CONTRACT.md`
-3. `config/model-ladder.example.yaml`
+## 2. Access modes — use the first one that works
+
+### Mode A — repository-aware AI
+
+Read the current canonical files needed for the task:
+
+1. `TEMO_LATEST.md`
+2. `SKILL.md`
+3. `docs/BEHAVIOR_CONTRACT.md`
 4. `templates/PROVIDER_DISCOVERY.md`
 5. `templates/CATALOG_CONFIDENCE_GATE.md`
 6. `templates/EXECUTION_CHOICE.md`
 7. `templates/CHECKPOINT.md`
-8. `templates/EXECUTION_HEADER.md` only when execution is actually requested
-9. `docs/CROSS_DEVICE_TEST.md` when portability/testing is requested
+8. `templates/EXECUTION_HEADER.md` only when execution is requested
+9. `docs/FEEDBACK_LOOP.md` when a meaningful feedback signal exists
+10. `docs/CROSS_DEVICE_TEST.md` when portability/testing is requested
 
-### Mode B — direct URL works but repository navigation/search fails
+Do not reload unchanged material repeatedly.
 
-Do not keep searching GitHub repeatedly.
+### Mode B — repository navigation/search fails
 
-After one failed repository lookup/index/search attempt, fetch the portable raw file directly:
+After one failed repository lookup, stop retrying GitHub search and fetch:
 
 `https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md`
 
-Use `TEMO_PORTABLE.md` as the complete behavior contract for the session. It is self-contained and does not require the other repository files.
+Use that file as the complete core behavior contract.
 
-### Mode C — no external web/repository access
+### Mode C — no external web access
 
-If the user uploaded or pasted `TEMO_PORTABLE.md`, use it directly and continue. Do not require the rest of the repository.
+If the user uploaded or pasted `TEMO_PORTABLE.md`, use it directly. Do not require the rest of the repository.
 
-If only a stale/full `SKILL.md` copy is already loaded, use that copy and do not invent missing model names, levels, boost modes, or controls.
+If only an older loaded copy exists, use it and clearly state that the latest version could not be checked. Never invent missing provider/model/level information.
 
-The repository cannot inject itself into an unrelated AI session without access or supplied content, so the portable single-file fallback is the official offline/no-browse path.
+## 3. Provider discovery before exact routing
 
-## Efficiency rule for bootstrap itself
+Before choosing an exact model or level:
 
-Bootstrap must also follow TEMO Efficiency:
+- identify/confirm the AI/tool;
+- verify the actual selectable model catalog for the user's current account/surface;
+- verify reasoning/level/thinking controls;
+- verify boost/speed/mode only when it exists and matters.
 
-- Do not spend 10–20 seconds repeatedly searching/indexing the same repository.
-- One failed repository lookup is enough to try the raw portable URL.
-- One failed raw fetch is enough to use an uploaded/pasted portable file or ask for that one file.
-- Do not ask for multiple repository files when `TEMO_PORTABLE.md` is sufficient.
-- Do not reload unchanged TEMO files during the same session.
-- Preserve the provider/model mapping and all previous PASS/VERIFIED state.
+If any of these are not authoritatively visible, request the smallest screenshot set needed:
 
-## Provider discovery comes before exact model routing
+```text
+I can’t verify the exact model + level choices available on your current AI/account yet.
+Send screenshots of:
+1) the expanded model picker,
+2) the expanded reasoning/level/thinking picker if separate,
+3) any boost/speed/mode selector if present.
+If the AI/tool itself is unclear, include one screenshot showing the app/site header or settings page.
 
-Before choosing FAST / BALANCED / DEEP / MAX, determine what environment the user is actually using.
+If screenshots are inconvenient, paste the exact visible labels instead.
+I’ll map them once and reuse the ladder for this session.
+```
 
-- If the host environment/provider and its current model/level controls are already authoritatively visible, use them directly.
-- Do not ask for information the environment already exposes.
-- If the provider/tool is unknown, ask once which AI/tool is being used.
-- If exact model names or reasoning/effort levels are not visible, ask for either:
-  - one screenshot of the model + level/reasoning picker, or
-  - a pasted list of the exact available models and levels.
-- Never invent model names, reasoning levels, boost modes, subscription controls, or provider capabilities.
+One screenshot is enough when it shows everything.
 
-## Catalog confidence gate — mandatory
+Provider brand, plan/tier, or one active model does not prove the full selectable catalog.
 
-Knowing the provider or the currently active model is **not** enough to claim knowledge of the full selectable catalog.
+## 4. Catalog confidence gate
 
-Before constructing an exact FAST / BALANCED / DEEP / MAX ladder, apply `templates/CATALOG_CONFIDENCE_GATE.md`.
+A full exact FAST/BALANCED/DEEP/MAX ladder may be built only from verified current information:
 
-A full exact ladder is allowed only when the selectable catalog is verified from one of these sources:
+- host/runtime selectable catalog metadata;
+- user screenshot(s);
+- user-pasted exact labels;
+- applicable current first-party catalog information that is demonstrably valid for that environment.
 
-1. host/runtime metadata that explicitly exposes the current selectable catalog or controls;
-2. a user screenshot of the actual model/level picker;
-3. a pasted list from the user containing the exact visible choices;
-4. an authoritative current first-party catalog exposed to the agent and applicable to the user's environment.
-
-The following are NOT valid catalog sources:
-
-- the model's own memory of model names;
-- guessing provider families or version numbers;
-- extrapolating alternatives from one active model;
-- stale/general docs that do not prove the user's current selectable options.
-
-If the assistant can identify only the active model but not the full catalog, use:
+If only the current model is verified:
 
 ```text
 CATALOG STATUS: PARTIAL
 ROUTING MODE: CURRENT_MODEL_ONLY
+FULL SELECTABLE CATALOG: UNKNOWN
 ```
 
-or ask once for the screenshot/pasted list. Do not fabricate a complete ladder.
+Do not invent alternatives.
 
-Hard FAIL condition:
+## 5. Routing remains task-based
 
-> The assistant says it cannot see the live model picker/catalog and then outputs exact alternative model names anyway.
-
-Classify this as `CATALOG_HALLUCINATION_FAIL`.
-
-## ChatGPT / OpenAI / Codex
-
-For ChatGPT, OpenAI, or Codex:
-
-- use the current models and reasoning/effort controls exposed by the active environment when available;
-- do not hardcode a permanent OpenAI catalog because product names and controls can change;
-- if the exact current choices are not visible, request one screenshot or pasted list, then map those real choices into the TEMO ladder.
-
-Environment identity or active-model identity does not automatically prove the exact model picker/catalog. If the exact catalog is not authoritative, discover it instead of guessing.
-
-## Other providers/tools
-
-For Claude / Claude Code, Gemini, Cursor, Copilot, Cloud Code, local models, or any other AI environment:
-
-- use an authoritative visible/programmatic catalog when available;
-- otherwise request one screenshot or exact pasted list;
-- infer the local ladder only from supplied/visible model names, capability labels, and actual reasoning/effort controls;
-- if capability ordering is ambiguous, ask only the smallest missing clarification instead of guessing.
-
-Do not use provider-family assumptions as a substitute for the real picker/catalog.
-
-## Session-local provider ladder
-
-Only after the Catalog Confidence Gate passes, build and retain:
-
-```text
-PROVIDER / TOOL: <actual environment>
-FAST MODEL: <smallest capable available model>
-FAST LEVEL: <lowest reliable level>
-BALANCED MODEL: <normal/default coding-analysis model>
-BALANCED LEVEL: <medium/default reasoning>
-DEEP MODEL: <strong reasoning/coding model>
-DEEP LEVEL: <medium/high as supported>
-MAX MODEL: <strongest available model, exceptional use only>
-MAX LEVEL: <highest justified supported level>
-BOOST / SPEED CONTROL: <available values or Not exposed>
-CONSUMPTION CONTROL: <available values or Not exposed>
-SOURCE: <host catalog | screenshot | pasted list | authoritative first-party catalog>
-CATALOG CONFIDENCE: VERIFIED
-```
-
-Reuse this mapping for the session. Do not ask again unless the provider, model catalog, account tier, or environment changes.
-
-## Routing remains task-based
-
-Score the current checkpoint and choose the smallest mapped model/level that can meet the unchanged acceptance criteria:
+Score the current checkpoint:
 
 - 0–2 → FAST
 - 3–5 → BALANCED
 - 6–8 → DEEP
 - 9–10 → MAX
 
-Escalate one level at a time only when evidence justifies it.
+Use the smallest verified mapped model/level that can satisfy unchanged acceptance criteria.
 
-## Mandatory user-facing result
+Escalation is only:
 
-Before every executable command, show:
+`FAST → BALANCED → DEEP → MAX`
+
+and only when evidence justifies it.
+
+## 6. Mandatory execution choice
+
+Before every executable command show:
 
 ```text
 EXECUTION CHOICE
 Tool / Environment: <exact environment>
-Model: <exact verified mapped model, or current model in CURRENT_MODEL_ONLY mode>
-Profile: <FAST | BALANCED | DEEP | MAX, or CURRENT_MODEL_ONLY when full ladder is unavailable>
-Level / Effort: <exact verified available level or Not exposed>
-Boost / Speed: <exact verified value or Not exposed>
-Consumption: <exact verified value or Not exposed>
+Model: <exact verified mapped model>
+Profile: <FAST | BALANCED | DEEP | MAX | CURRENT_MODEL_ONLY>
+Level / Effort: <exact verified level or Not exposed / not verified>
+Boost / Speed: <verified value or Not exposed>
+Consumption: <verified value or Not exposed>
 Deploy: <YES | NO>
 Reason: <one concise reason>
 
 Then copy and execute the command below.
 ```
 
-The user should not have to guess which model or level to select when TEMO Efficiency has enough **verified** information to choose.
+The user should not have to guess when TEMO has enough verified information to choose.
 
-## Portable activation
+## 7. Protect verified work
 
-For a fresh conversation, prefer this compact activation:
+After a meaningful success, mark the proven contract `LOCKED_PASS` / `VERIFIED` and do not repeat it unless relevant code, dependency, environment, provider catalog, requirement, or evidence changes.
+
+## 8. Feedback loop — opt in, not telemetry
+
+TEMO does **not** silently upload conversations, screenshots, prompts, code, logs, provider catalogs, or telemetry.
+
+When a run produces a meaningful signal — routing too strong/weak, provider discovery failure, catalog hallucination, portability failure, new provider controls, successful regression protection, or documentation problem — the agent may prepare a compact `TEMO FEEDBACK` report using `docs/FEEDBACK_LOOP.md`.
+
+The user decides whether to submit it.
+
+If GitHub issue creation is available, create an issue only after explicit user approval. Otherwise return the report ready to paste into the repository's `TEMO Efficiency Feedback` issue form.
+
+Do not ask for feedback after every trivial task.
+
+## 9. Portable activation
+
+In a fresh conversation:
 
 ```text
 Use TEMO Efficiency.
 First try the canonical repository: https://github.com/luaysameer/temo-efficiency
-If repository navigation/search fails, immediately load the portable contract from:
+If repository navigation/search fails, immediately load:
 https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
 Do not keep retrying GitHub search.
 Then follow TEMO Efficiency for my next task.
 ```
 
-If the environment has no external web access at all, upload or paste **only `TEMO_PORTABLE.md`**. No other TEMO file is required for core behavior.
+If there is no web access, upload only `TEMO_PORTABLE.md`.
 
-The expected fresh-session/provider behavior is defined in `docs/CROSS_DEVICE_TEST.md`.
+## 10. Privacy and safety
+
+- No hidden telemetry.
+- No automatic GitHub writes from unrelated users.
+- No feedback submission without user choice.
+- Redact secrets, tokens, personal identifiers, private URLs, and confidential data from feedback.
+- Do not lower acceptance criteria to save usage.
+
+The expected fresh-session behavior is defined in `docs/CROSS_DEVICE_TEST.md`.
