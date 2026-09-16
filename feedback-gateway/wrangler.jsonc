@@ -12,7 +12,7 @@
   "vars": {
     "GITHUB_OWNER": "luaysameer",
     "GITHUB_REPO": "temo-efficiency",
-    "GATEWAY_VERSION": "0.1.0",
+    "GATEWAY_VERSION": "0.1.1",
     "MAX_DAILY_ISSUES": "100"
   },
   "ratelimits": [
@@ -30,6 +30,14 @@
       "simple": {
         "limit": 12,
         "period": 60
+      }
+    },
+    {
+      "name": "FINGERPRINT_RATE_LIMITER",
+      "namespace_id": "9515003",
+      "simple": {
+        "limit": 1,
+        "period": 10
       }
     }
   ]
