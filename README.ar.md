@@ -89,9 +89,39 @@ MAX       → أقوى موديل + أعلى Level مبرر فقط للحالا�
 
 إذا الخيارات الحالية غير ظاهرة للـAgent، يطلب صورة أو قائمة مرة واحدة ثم يربطها بـFAST/BALANCED/DEEP/MAX.
 
+## إذا GitHub ما يفتح مضبوط
+
+هذا ضعف ظهر باختبار حقيقي بين أكثر من AI: واحد قدر يقرأ المشروع، والثاني ظل يحاول يبحث عن الـrepo وبعدين فشل.
+
+هسه TEMO Efficiency عندها 3 طرق رسمية:
+
+```text
+A) الـAI يقدر يفتح GitHub بالكامل
+   → يحمل الملفات الأصلية بشكل طبيعي
+
+B) البحث/التنقل داخل GitHub يفشل
+   → بعد محاولة واحدة فقط يوقف البحث المتكرر
+   → يفتح ملف Portable مباشر:
+https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
+
+C) ماكو Web access نهائياً
+   → ترفع TEMO_PORTABLE.md مرة واحدة
+   → ويشتغل من الملف وحده
+```
+
+[`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) ملف **Self-contained**. إذا هو محمّل بالمحادثة، ما يحتاج الـAI يطلب بقية ملفات المشروع حتى ينفذ السلوك الأساسي.
+
+يعني حتى الـBootstrap نفسه يتبع TEMO Efficiency: **محاولة GitHub فاشلة واحدة تكفي حتى ينتقل للـfallback**، بدل ما يضيع وقت واستهلاك على Search/Indexing متكرر.
+
 ## ملف واحد يكفي للبدء
 
-إذا الـAgent عنده وصول للمشروع، تحميل `README.md` أو [`SKILL.md`](SKILL.md) يكفي حتى يبدأ الـBootstrap ويقرأ الملفات الحالية:
+عندك 3 مداخل صحيحة:
+
+- `README.md` إذا GitHub متاح؛
+- [`SKILL.md`](SKILL.md) كعقد Skill رسمي؛
+- [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) إذا تريد ملف واحد محمول أو AI بدون تصفح جيد.
+
+إذا الـAgent عنده وصول كامل للمشروع، الـBootstrap يقرأ:
 
 1. [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md)
 2. [`SKILL.md`](SKILL.md)
@@ -104,16 +134,23 @@ MAX       → أقوى موديل + أعلى Level مبرر فقط للحالا�
 
 ## شلون أشغلها بمحادثة جديدة أو هاتف ثاني؟
 
-افتح محادثة جديدة والصق:
+استخدم هذا النص المختصر:
 
 ```text
-Use TEMO Efficiency from https://github.com/luaysameer/temo-efficiency
-Load the current SKILL.md and TEMO_BOOTSTRAP.md, follow them as the execution behavior contract for this chat, and do not execute my task until you have completed the provider/model/level discovery required by the skill.
+Use TEMO Efficiency.
+First try: https://github.com/luaysameer/temo-efficiency
+If repository search/navigation fails, do NOT keep retrying it. Immediately load:
+https://raw.githubusercontent.com/luaysameer/temo-efficiency/main/TEMO_PORTABLE.md
+Then follow TEMO Efficiency for my next task.
 ```
 
-وبعدها اكتب مهمتك.
+إذا الذكاء ما عنده Web access نهائياً، ارفع فقط `TEMO_PORTABLE.md` وقل:
 
-إذا الذكاء المستخدم ما يقدر يفتح GitHub، لازم ترفع له ملفات المهارة أو تلصقها. GitHub وحده ما يگدر يفرض نفسه تلقائياً داخل محادثة منفصلة إذا ما تم إعطاء الرابط/الملفات أو ما عندها صلاحية للوصول.
+```text
+Use the attached TEMO_PORTABLE.md as the TEMO Efficiency behavior contract for this chat.
+```
+
+GitHub وحده ما يگدر يحقن الـSkill داخل محادثة منفصلة بدون رابط/ملف أو صلاحية وصول، لذلك بمحادثة جديدة لازم تعطيه الرابط أو الملف مرة واحدة.
 
 ## اختبارها على جهاز ثاني
 
@@ -121,7 +158,13 @@ Load the current SKILL.md and TEMO_BOOTSTRAP.md, follow them as the execution be
 
 [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md)
 
-هذا الملف يعطيك اختبار جاهز لمحادثة جديدة ويحدد شنو يعتبر PASS وشنو يعتبر FAIL.
+الاختبار هسه يغطي:
+
+- GitHub كامل يشتغل؛
+- GitHub search يفشل لكن Raw URL يشتغل؛
+- ماكو Web access ويشتغل بملف Portable واحد؛
+- Provider غير معروف؛
+- التصعيد FAST → BALANCED → DEEP → MAX.
 
 الـPASS الصحيح يعني:
 
@@ -130,6 +173,7 @@ Load the current SKILL.md and TEMO_BOOTSTRAP.md, follow them as the execution be
 - يعرض `EXECUTION CHOICE` قبل الأمر؛
 - يبدأ بأصغر Profile مناسب؛
 - ما يعيد الشغل الذي صار PASS؛
+- ما يظل يبحث عن GitHub بعد فشل واضح؛
 - يصعد فقط `FAST → BALANCED → DEEP → MAX` وبالدليل.
 
 ## نظام التوجيه
@@ -186,7 +230,8 @@ TEMO Efficiency ما توفر الاستهلاك عن طريق تقليل الج
 ## الملفات المهمة
 
 - [`SKILL.md`](SKILL.md) — القواعد الملزمة للمهارة
-- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — آلية تحميل المنظومة
+- [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — آلية التحميل والـfallback
+- [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) — ملف واحد Self-contained
 - [`docs/BEHAVIOR_CONTRACT.md`](docs/BEHAVIOR_CONTRACT.md) — شنو لازم تسوي المهارة بالضبط
 - [`docs/CROSS_DEVICE_TEST.md`](docs/CROSS_DEVICE_TEST.md) — اختبارها بمحادثة/جهاز ثاني
 - [`templates/PROVIDER_DISCOVERY.md`](templates/PROVIDER_DISCOVERY.md) — اكتشاف الموديلات والـLevels
