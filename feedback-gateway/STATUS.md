@@ -1,6 +1,6 @@
 # TEMO Feedback Gateway Status
 
-Current state: **DEPLOYED — HEALTH_PASS — SECRET_PENDING**
+Current state: **DEPLOYED — HEALTH_PASS — SECRET_READY — LIVE_TEST_PENDING**
 
 Gateway version: `0.1.0`
 Production URL: `https://temo-feedback-gateway.cpu2turn.workers.dev`
@@ -12,13 +12,13 @@ Target repository: `luaysameer/temo-efficiency`
 - Worker deployment succeeded from `main`.
 - Production workers.dev URL is enabled.
 - `GET /api/health` returns `ok: true`.
+- Cloudflare secret `GITHUB_TOKEN` is configured and the health endpoint reports `ready: true`.
 - Health response reports:
   - service: `TEMO Feedback Gateway`
   - version: `0.1.0`
   - target: `luaysameer/temo-efficiency`
   - endpoint: `/v1/feedback`
   - transport: `GitHub Issues`
-- `ready: false` is expected until the Cloudflare secret `GITHUB_TOKEN` is configured.
 
 ## Implemented
 
@@ -37,13 +37,9 @@ Target repository: `luaysameer/temo-efficiency`
 - Example feedback payload.
 - GitHub Actions validation workflow added.
 
-## Current blocker
+## Current checkpoint
 
-Create a fine-grained GitHub token restricted to `luaysameer/temo-efficiency` with the minimum repository permissions needed by the gateway, then store it only as the Cloudflare Worker secret:
-
-`GITHUB_TOKEN`
-
-After the secret is added, `/api/health` must report `ready: true` before Issue creation tests begin.
+The gateway is deployed and secret-ready. Live acceptance testing remains before the endpoint is published as the canonical feedback transport inside `SKILL.md` and `TEMO_PORTABLE.md`.
 
 ## Not yet ACTIVE
 
@@ -52,7 +48,7 @@ Do not add the production gateway URL to `SKILL.md` or `TEMO_PORTABLE.md` until 
 ## Activation acceptance checks
 
 1. Worker deploy succeeds. — PASS
-2. `GET /api/health` returns `ok: true`. — PASS
+2. `GET /api/health` returns `ok: true` and `ready: true`. — PASS
 3. `GET /v1/schema` returns schema `1.0`.
 4. Valid test payload creates exactly one GitHub Issue.
 5. Repeating the same payload returns the existing Issue (`duplicate: true`).
