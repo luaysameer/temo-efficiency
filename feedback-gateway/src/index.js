@@ -148,15 +148,34 @@ export default {
       const fingerprint = await feedbackFingerprint(clean);
       const issueToken = `TFG-${fingerprint.slice(0, 12).toUpperCase()}`;
 
+      const cached = await getCachedIssue(issueToken);
+      if (cached) return duplicateResponse(issueToken, cached);
+
       const existing = await findExistingIssue(issueToken, env);
       if (existing) {
+        await cacheIssue(issueToken, existing);
+        return duplicateResponse(issueToken, existing);
+      }
+
+      const fingerprintLimit = await env.FINGERPRINT_RATE_LIMITER.limit({ key: `fingerprint:${issueToken}` });
+      if (!fingerprintLimit.success) {
+        const inFlight = await waitForExistingIssue(issueToken, env);
+        if (inFlight) {
+          await cacheIssue(issueToken, inFlight);
+          return duplicateResponse(issueToken, inFlight);
+        }
         return json({
-          ok: true,
-          duplicate: true,
+          ok: false,
+          error: "duplicate_in_flight",
           fingerprint: issueToken,
-          issueNumber: existing.number,
-          issueUrl: existing.html_url
-        }, 200);
+          retryAfterSeconds: 10
+        }, 429, { "Retry-After": "10" });
+      }
+
+      const recheck = await findExistingIssue(issueToken, env);
+      if (recheck) {
+        await cacheIssue(issueToken, recheck);
+        return duplicateResponse(issueToken, recheck);
       }
 
       const maxDaily = Math.max(1, Number(env.MAX_DAILY_ISSUES || 100));
@@ -173,6 +192,7 @@ export default {
       const title = buildIssueTitle(clean, issueToken);
       const body = buildIssueBody(clean, issueToken, env);
       const issue = await createIssue(title, body, env);
+      await cacheIssue(issueToken, issue);
 
       return json({
         ok: true,
@@ -187,6 +207,16 @@ export default {
     }
   }
 };
+
+function duplicateResponse(issueToken, issue) {
+  return json({
+    ok: true,
+    duplicate: true,
+    fingerprint: issueToken,
+    issueNumber: issue.number,
+    issueUrl: issue.html_url
+  }, 200);
+}
 
 function validatePayload(payload) {
   const errors = [];
@@ -318,16 +348,79 @@ async function sha256Hex(value) {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function cacheKey(issueToken) {
+  return new Request(`https://temo-feedback-cache.invalid/${encodeURIComponent(issueToken)}`);
+}
+
+async function getCachedIssue(issueToken) {
+  try {
+    const response = await caches.default.match(cacheKey(issueToken));
+    if (!response) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function cacheIssue(issueToken, issue) {
+  try {
+    const value = {
+      number: issue.number,
+      html_url: issue.html_url
+    };
+    const response = new Response(JSON.stringify(value), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=3600"
+      }
+    });
+    await caches.default.put(cacheKey(issueToken), response);
+  } catch {
+    // Cache is an optimization only; GitHub remains authoritative.
+  }
+}
+
 async function findExistingIssue(issueToken, env) {
+  const recentPath = `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/issues?state=all&per_page=100&sort=created&direction=desc`;
+  const recentResponse = await githubFetch(recentPath, env);
+  if (!recentResponse.ok) {
+    const details = await recentResponse.text();
+    console.error("GitHub recent issue list failed", recentResponse.status, details.slice(0, 500));
+    throw new Error("github_recent_issue_list_failed");
+  }
+
+  const recent = await recentResponse.json();
+  const direct = recent.find((item) =>
+    !item.pull_request &&
+    typeof item.title === "string" &&
+    item.title.includes(issueToken)
+  );
+  if (direct) return direct;
+
   const query = `repo:${env.GITHUB_OWNER}/${env.GITHUB_REPO} is:issue in:title ${issueToken}`;
-  const response = await githubFetch(`/search/issues?q=${encodeURIComponent(query)}&per_page=1`, env);
-  if (!response.ok) {
-    const details = await response.text();
-    console.error("GitHub issue search failed", response.status, details.slice(0, 500));
+  const searchResponse = await githubFetch(`/search/issues?q=${encodeURIComponent(query)}&per_page=1`, env);
+  if (!searchResponse.ok) {
+    const details = await searchResponse.text();
+    console.error("GitHub issue search failed", searchResponse.status, details.slice(0, 500));
     throw new Error("github_search_failed");
   }
-  const data = await response.json();
+  const data = await searchResponse.json();
   return data.items?.[0] || null;
+}
+
+async function waitForExistingIssue(issueToken, env) {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await sleep(500);
+    const cached = await getCachedIssue(issueToken);
+    if (cached) return cached;
+    const existing = await findExistingIssue(issueToken, env);
+    if (existing) return existing;
+  }
+  return null;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function countTodayGatewayIssues(env) {
