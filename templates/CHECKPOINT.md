@@ -1,5 +1,23 @@
 # TEMO Efficiency — Micro-Checkpoint Template
 
+Before every execution command, present the execution choice to the user first. Do not make the user infer which model or level to select.
+
+```text
+EXECUTION CHOICE
+Tool / Environment: <Codex Local | Work | other exact environment>
+Model: <exact available model name when known; otherwise mapped profile model>
+Profile: <FAST | BALANCED | DEEP | MAX>
+Level / Effort: <Low | Medium | High>
+Boost / Speed: <OFF by default unless justified>
+Consumption: <lowest practical setting that can satisfy acceptance>
+Deploy: <YES | NO>
+Reason: <one concise sentence explaining why this choice is sufficient>
+
+Then copy and execute the command below.
+```
+
+Only after the user-facing execution choice, provide the executable checkpoint:
+
 ```text
 EXECUTE THIS CHECKPOINT NOW. START IMPLEMENTATION IMMEDIATELY. DO NOT ASK ME WHAT TO DO.
 
