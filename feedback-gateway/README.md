@@ -38,9 +38,11 @@ The GitHub credential is stored only as the Cloudflare Worker secret `GITHUB_TOK
 
 ## Endpoints
 
-- `GET /api/health` — service health and version.
+- `GET /api/health` — service health, version and safe readiness state.
 - `GET /v1/schema` — machine-readable accepted schema.
 - `POST /v1/feedback` — submit structured feedback.
+
+`/api/health` returns `ready: false` until `GITHUB_TOKEN` is configured. This allows the first Worker deployment to succeed safely before the secret is added. Feedback POSTs return HTTP 503 while the transport is not configured.
 
 ## Feedback modes
 
@@ -60,13 +62,13 @@ Create a **fine-grained GitHub personal access token** restricted to the `luaysa
 
 Do not commit the token.
 
-Set it in Cloudflare as a Worker secret:
+After the first Worker deployment, add it as the Cloudflare runtime secret `GITHUB_TOKEN` under **Settings → Variables & Secrets**. You can also use Wrangler:
 
 ```bash
 npx wrangler secret put GITHUB_TOKEN
 ```
 
-Cloudflare Secrets are intended for sensitive values such as API tokens and are exposed to Worker code through the `env` binding without placing the value in source control.
+Cloudflare Secrets are intended for sensitive values such as API tokens and expose the value to Worker code through `env` without putting the secret in source control.
 
 ## Cloudflare deployment — Git integration
 
@@ -80,7 +82,9 @@ Recommended setup:
 6. Build command: leave empty.
 7. Deploy command: `npx wrangler deploy`.
 8. Save and deploy.
-9. Add runtime secret `GITHUB_TOKEN` under Worker **Settings → Variables & Secrets**.
+9. Open the generated Worker URL and check `/api/health` — first deploy should show `ok: true` and `ready: false`.
+10. Add runtime secret `GITHUB_TOKEN` under Worker **Settings → Variables & Secrets**.
+11. Check `/api/health` again — it must now show `ready: true`.
 
 Cloudflare Workers Builds supports a repository root directory for monorepos and defaults the deploy command to `npx wrangler deploy`.
 
@@ -140,14 +144,16 @@ Successful new submission:
 
 ## Test order after deployment
 
-1. `GET /api/health` → `ok: true`.
-2. `GET /v1/schema` → schema `1.0`.
-3. Submit `example-feedback.json` → GitHub Issue created.
-4. Submit the same payload again → `duplicate: true`, no second Issue.
-5. Send an unsupported field such as `rawConversation` → HTTP 400.
-6. Send `consent: false` → HTTP 400.
-7. Exceed client rate limit → HTTP 429.
-8. Confirm the created Issue contains no client ID, email, raw conversation, code, logs, or token.
+1. `GET /api/health` before secret → `ok: true`, `ready: false`.
+2. Add `GITHUB_TOKEN` as a Cloudflare runtime secret.
+3. `GET /api/health` after secret → `ready: true`.
+4. `GET /v1/schema` → schema `1.0`.
+5. Submit `example-feedback.json` → GitHub Issue created.
+6. Submit the same payload again → `duplicate: true`, no second Issue.
+7. Send an unsupported field such as `rawConversation` → HTTP 400.
+8. Send `consent: false` → HTTP 400.
+9. Exceed client rate limit → HTTP 429.
+10. Confirm the created Issue contains no client ID, email, raw conversation, code, logs, or token.
 
 ## After the gateway URL is verified
 
