@@ -2,6 +2,46 @@
 # Map these profiles to models that actually exist in your environment.
 # Do not invent model names. Update this file when your provider/model catalog changes.
 
+bootstrap:
+  canonical_repository: "luaysameer/temo-efficiency"
+  load_canonical_rules_when_reachable: true
+  entrypoints:
+    - "README.md"
+    - "SKILL.md"
+  required_files:
+    - "TEMO_BOOTSTRAP.md"
+    - "SKILL.md"
+    - "config/model-ladder.example.yaml"
+    - "templates/PROVIDER_DISCOVERY.md"
+    - "templates/EXECUTION_CHOICE.md"
+    - "templates/CHECKPOINT.md"
+  execution_only_file:
+    - "templates/EXECUTION_HEADER.md"
+  reload_unchanged_files_in_same_session: false
+
+provider_discovery:
+  detect_environment_before_asking: true
+  ask_provider_once_if_unknown: true
+  accept_catalog_sources:
+    - "authoritative_host_catalog"
+    - "screenshot"
+    - "pasted_list"
+    - "authoritative_provider_information_exposed_by_environment"
+  ask_for_screenshot_or_list_when_exact_catalog_unknown: true
+  cache_session_mapping: true
+  rediscover_only_when_catalog_or_environment_changes: true
+  never_invent_model_names: true
+  never_invent_levels: true
+  never_invent_boost_or_consumption_controls: true
+  chatgpt_openai_codex:
+    use_current_environment_catalog_when_visible: true
+    hardcode_permanent_model_catalog: false
+    request_screenshot_or_list_when_not_visible: true
+  other_providers:
+    use_programmatic_catalog_when_available: true
+    request_screenshot_or_list_otherwise: true
+    ask_minimal_clarification_when_capability_order_is_ambiguous: true
+
 profiles:
   fast:
     model: "SET_YOUR_FAST_MODEL"
@@ -39,10 +79,13 @@ presentation:
     - "level_or_effort"
     - "boost_or_speed"
     - "consumption"
+    - "deploy"
     - "reason"
   instruction_label: "Then copy and execute the command below"
   choose_for_user_when_possible: true
   do_not_make_user_guess: true
+  use_exact_discovered_model_name: true
+  use_exact_discovered_level_name_when_exposed: true
 
 policy:
   preserve_acceptance_criteria: true
@@ -52,3 +95,4 @@ policy:
   boost_by_default: false
   escalate_one_level_at_a_time: true
   present_execution_choice_before_command: true
+  preserve_provider_mapping_during_escalation: true
