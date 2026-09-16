@@ -1,7 +1,7 @@
 ---
 name: temo-efficiency
-description: Credit-aware model routing and micro-checkpoint execution for GPT/Codex-style agent workflows. Chooses the smallest capable model/effort, protects verified work, minimizes repeated context and tests, and escalates only when evidence justifies it.
-version: 1.0.0
+description: Credit-aware model routing and micro-checkpoint execution for GPT/Codex-style agent workflows. Chooses the smallest capable model/effort, shows the recommended execution setup before every command, protects verified work, minimizes repeated context and tests, and escalates only when evidence justifies it.
+version: 1.1.0
 license: MIT
 ---
 
@@ -11,20 +11,53 @@ Use this skill when a task can benefit from deliberate model selection, staged i
 
 ## Core objective
 
-Spend reasoning capacity where it materially improves the result. Do not choose a stronger model or higher effort by habit. Do not save credits by weakening acceptance criteria. Save credits by reducing unnecessary reasoning, repeated context, duplicated tests, and rework.
+Spend reasoning capacity where it materially improves the result. Do not choose a stronger model or higher effort by habit. Do not save credits by weakening acceptance criteria. Save credits by reducing unnecessary reasoning, repeated context, duplicated tests, setup ambiguity, and rework.
 
 ## Non-negotiable rules
 
 1. Preserve acceptance criteria. Efficiency must never mean lowering the user's required quality bar.
 2. Choose the smallest capable model profile for the current checkpoint.
-3. Split large work into micro-checkpoints with one primary objective each.
-4. Never redo previously verified work unless the relevant code, dependency, environment, or requirement changed.
-5. Prefer targeted tests over full regression when the change surface is narrow. Run broader regression when shared contracts, routing, schemas, security boundaries, or deployment foundations changed.
-6. Escalate model/effort only after concrete evidence: failing tests, ambiguous root cause, broad architectural coupling, safety/security risk, or repeated inability of the current profile to satisfy the checkpoint.
-7. Separate IMPLEMENTED from VERIFIED. Do not call a result verified without the required acceptance evidence.
-8. Deployment is a gate, not a default. Deploy only when the checkpoint explicitly permits it and required tests pass.
-9. After fixing a regression, add a regression guard when practical so the same failure is not paid for twice.
-10. Stop at the checkpoint boundary. Do not opportunistically start the next feature.
+3. Before every execution command, show the user the recommended execution setup first: tool/environment, model, profile, level/effort, boost/speed, consumption setting, deploy state, and one concise reason for the choice.
+4. Do not make the user guess the model or level when the available environment/model catalog is known. Choose for them. If exact model names are not known, state the capability profile and tell them to select the mapped model from their local ladder instead of inventing a model name.
+5. Split large work into micro-checkpoints with one primary objective each.
+6. Never redo previously verified work unless the relevant code, dependency, environment, or requirement changed.
+7. Prefer targeted tests over full regression when the change surface is narrow. Run broader regression when shared contracts, routing, schemas, security boundaries, or deployment foundations changed.
+8. Escalate model/effort only after concrete evidence: failing tests, ambiguous root cause, broad architectural coupling, safety/security risk, or repeated inability of the current profile to satisfy the checkpoint.
+9. Separate IMPLEMENTED from VERIFIED. Do not call a result verified without the required acceptance evidence.
+10. Deployment is a gate, not a default. Deploy only when the checkpoint explicitly permits it and required tests pass.
+11. After fixing a regression, add a regression guard when practical so the same failure is not paid for twice.
+12. Stop at the checkpoint boundary. Do not opportunistically start the next feature.
+
+## Mandatory pre-execution selection
+
+For any task where the user wants execution, implementation, debugging, deployment, file mutation, device work, or a copy/paste command for another agent, present this block BEFORE the executable instruction:
+
+```text
+EXECUTION CHOICE
+Tool / Environment: <exact tool or environment>
+Model: <exact available model name when known; otherwise mapped profile model>
+Profile: <FAST | BALANCED | DEEP | MAX>
+Level / Effort: <Low | Medium | High>
+Boost / Speed: <OFF by default unless justified>
+Consumption: <lowest practical setting that can still satisfy acceptance>
+Deploy: <YES | NO>
+Reason: <one concise sentence explaining why this selection is sufficient>
+
+Then copy and execute the command below.
+```
+
+This block is user-facing and must come before the implementation command.
+
+Rules:
+
+- Prefer a concrete model name when the actual model catalog is known.
+- Never invent a model name.
+- If the environment exposes separate model and reasoning/effort controls, specify both.
+- If the environment has no boost or consumption control, write `Not exposed` rather than inventing one.
+- If local hardware/device access is required, explicitly choose a local environment instead of a cloud environment that cannot reach the device.
+- Keep the explanation short. The purpose is to eliminate setup ambiguity before execution.
+- Do not ask the user to choose among multiple models when one is clearly appropriate from the routing score.
+- If later evidence requires escalation, present a new execution choice before the next execution command, preserving prior PASS/VERIFIED state.
 
 ## Model routing
 
@@ -90,6 +123,8 @@ THIS IS AN IMPLEMENTATION COMMAND, NOT A REVIEW REQUEST. COMPLETE THE CHECKPOINT
 
 Use this header only when the user actually wants execution.
 
+The user-facing `EXECUTION CHOICE` block must appear before this implementation header.
+
 ## Escalation ladder
 
 Do not jump directly to the strongest model. Escalate one step at a time:
@@ -106,6 +141,8 @@ Escalate when at least one is true:
 - the current profile failed to meet the same unchanged acceptance criteria
 
 When escalating, keep all useful diagnostics and completed work. Do not restart from zero.
+
+Before issuing the next executable command after escalation, show the updated `EXECUTION CHOICE` block with the new model/profile/level and the evidence-based reason for changing it.
 
 ## Regression protection
 
@@ -141,7 +178,25 @@ Before sending large context to a strong model:
 
 ## Output format
 
-For a planned checkpoint, return a compact execution block with:
+For an execution task, first return the user-facing setup:
+
+```text
+EXECUTION CHOICE
+Tool / Environment:
+Model:
+Profile:
+Level / Effort:
+Boost / Speed:
+Consumption:
+Deploy:
+Reason:
+
+Then copy and execute the command below.
+```
+
+Then provide one copy/paste prompt containing the mandatory execution header and the checkpoint specification.
+
+For a planned checkpoint that is not yet being executed, return a compact execution block with:
 
 ```text
 Tool:
@@ -157,8 +212,6 @@ Success condition:
 Stop condition:
 ```
 
-Then provide one copy/paste prompt containing the mandatory execution header and the checkpoint specification.
-
 ## Credit-safety claim
 
-This skill does not bypass quotas, billing, rate limits, or subscription rules, and it cannot guarantee a fixed percentage of savings. Its purpose is to reduce avoidable usage by routing work to an appropriate capability level, preventing duplicate work, and keeping verification proportional to the change surface.
+This skill does not bypass quotas, billing, rate limits, or subscription rules, and it cannot guarantee a fixed percentage of savings. Its purpose is to reduce avoidable usage by routing work to an appropriate capability level, preventing duplicate work, keeping setup explicit, and keeping verification proportional to the change surface.
