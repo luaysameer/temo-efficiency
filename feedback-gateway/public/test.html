@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TEMO Feedback Gateway Test</title>
+  <style>
+    :root{color-scheme:dark}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b1020;color:#eef3ff}.wrap{max-width:760px;margin:auto;padding:24px}.card{background:#121a31;border:1px solid #273252;border-radius:18px;padding:18px;margin:14px 0}.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#1c2849;font-size:13px}.row{display:grid;gap:10px}button{appearance:none;border:0;border-radius:12px;padding:14px 16px;font-size:16px;font-weight:700;background:#377dff;color:white}button.secondary{background:#273252}button.warn{background:#9146ff}button.danger{background:#b63a51}pre{white-space:pre-wrap;word-break:break-word;background:#080d18;border-radius:12px;padding:14px;min-height:120px;overflow:auto}.muted{color:#aeb9d8}.ok{color:#62e6a7}.fail{color:#ff8f9f}code{background:#0a1020;padding:2px 6px;border-radius:6px}</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>TEMO Feedback Gateway</h1>
+  <p class="muted">Browser acceptance console. No token is exposed to this page.</p>
+
+  <div class="card">
+    <span class="badge">Production test</span>
+    <p><strong>Important:</strong> “Create test Issue” creates one real GitHub Issue in <code>luaysameer/temo-efficiency</code>. The duplicate test should reuse that same Issue.</p>
+  </div>
+
+  <div class="card row">
+    <button id="health">1. Check health</button>
+    <button id="schema" class="secondary">2. Check schema</button>
+    <button id="create" class="warn">3. Create test Issue</button>
+    <button id="duplicate" class="secondary">4. Duplicate test</button>
+    <button id="privacy" class="danger">5. Privacy rejection test</button>
+    <button id="consent" class="danger">6. Consent rejection test</button>
+  </div>
+
+  <div class="card">
+    <h2>Result</h2>
+    <div id="status" class="muted">Ready.</div>
+    <pre id="out">No request yet.</pre>
+  </div>
+</div>
+<script>
+const out=document.getElementById('out');
+const statusEl=document.getElementById('status');
+const clientId=localStorage.temoFeedbackTestClient||(localStorage.temoFeedbackTestClient='browser-test-'+crypto.randomUUID());
+const basePayload={
+  schemaVersion:'1.0',
+  source:'temo-efficiency',
+  consent:true,
+  feedbackMode:'MANUAL',
+  clientId,
+  language:'en',
+  providerTool:'TEMO Gateway Browser Test',
+  temoVersion:'1.5.0',
+  signalCode:'DOCUMENTATION_USABILITY',
+  confidence:'HIGH',
+  retryCount:0,
+  result:'PASS',
+  taskType:'gateway acceptance test',
+  catalogStatus:'UNKNOWN',
+  initialRoute:'N/A',
+  escalation:'none',
+  missedContract:'',
+  whatHappened:'Production browser acceptance test submitted structured feedback through TEMO Feedback Gateway.',
+  expectedBehavior:'Create exactly one structured GitHub Issue and reuse it for an identical duplicate submission.',
+  likelyCause:'N/A',
+  suggestedImprovement:'N/A'
+};
+async function showRequest(label, fn){
+  statusEl.textContent=label+'…'; statusEl.className='muted'; out.textContent='Working…';
+  try{
+    const r=await fn(); let data; const text=await r.text();
+    try{data=JSON.parse(text)}catch{data=text}
+    statusEl.textContent=label+' → HTTP '+r.status; statusEl.className=r.ok?'ok':'fail';
+    out.textContent=typeof data==='string'?data:JSON.stringify(data,null,2);
+  }catch(e){statusEl.textContent=label+' → request failed';statusEl.className='fail';out.textContent=String(e)}
+}
+document.getElementById('health').onclick=()=>showRequest('Health',()=>fetch('/api/health'));
+document.getElementById('schema').onclick=()=>showRequest('Schema',()=>fetch('/v1/schema'));
+function post(payload){return fetch('/v1/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})}
+document.getElementById('create').onclick=()=>showRequest('Create test Issue',()=>post({...basePayload}));
+document.getElementById('duplicate').onclick=()=>showRequest('Duplicate test',()=>post({...basePayload}));
+document.getElementById('privacy').onclick=()=>showRequest('Privacy rejection',()=>post({...basePayload,rawConversation:'THIS FIELD MUST BE REJECTED'}));
+document.getElementById('consent').onclick=()=>showRequest('Consent rejection',()=>post({...basePayload,consent:false}));
+</script>
+</body>
+</html>
