@@ -11,6 +11,26 @@ Built through the **TEMO × AREEN** workflow, it turns each task into a scored, 
 
 If that principle would improve your agent workflow, **[Star TEMO Efficiency](https://github.com/luaysameer/temo-efficiency)** and share what happens on a real task.
 
+## What changes for the user
+
+Before every executable command, TEMO Efficiency now makes the execution choice explicit instead of leaving setup to guesswork:
+
+```text
+EXECUTION CHOICE
+Tool / Environment: Codex Local
+Model: <exact available model or mapped profile model>
+Profile: FAST
+Level / Effort: Low
+Boost / Speed: OFF
+Consumption: Low
+Deploy: NO
+Reason: The current checkpoint is deterministic and narrow.
+
+Then copy and execute the command below.
+```
+
+The skill chooses the smallest capable model/profile, names the reasoning level, explains the choice in one line, and only escalates when evidence requires it. See [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md).
+
 ## Quick Start
 
 1. Load [`SKILL.md`](SKILL.md) in your agent's skill directory, or paste it into the project instructions for a GPT/Codex-style workflow.
@@ -19,6 +39,8 @@ If that principle would improve your agent workflow, **[Star TEMO Efficiency](ht
 
 ```text
 Use the TEMO Efficiency rules in SKILL.md for this task.
+Before every execution command, show me the recommended Tool / Model / Profile / Level / Boost / Consumption / Deploy choice and one short reason.
+Choose for me when the environment is known; do not make me guess the model or level.
 Score the current task, choose FAST / BALANCED / DEEP / MAX, and explain the route.
 Create and execute one narrow micro-checkpoint. Preserve existing acceptance criteria and previous PASS states.
 Run verification proportional to the change surface, add a regression guard when practical, and escalate only when diagnostics justify it.
@@ -49,32 +71,34 @@ Task: Fix a reproducible parser bug in one input path.
 
 ```text
 1. Score complexity, risk, scope, verification burden, and uncertainty.
-2. Choose FAST / BALANCED / DEEP / MAX from the score and evidence.
-3. Create one narrow micro-checkpoint for the failing parser path.
-4. Reproduce the failure, make the bounded change, and run targeted verification.
-5. Add the smallest regression guard for the broken contract.
-6. Preserve previous PASS state outside the change surface.
-7. Escalate one profile only if diagnostics show ambiguity, coupling, or risk.
+2. Show the user the exact execution choice: tool, model, profile, level, boost, consumption, deploy, reason.
+3. Choose FAST / BALANCED / DEEP / MAX from the score and evidence.
+4. Create one narrow micro-checkpoint for the failing path.
+5. Reproduce the failure, make the bounded change, and run targeted verification.
+6. Add the smallest regression guard for the broken contract.
+7. Preserve previous PASS state outside the change surface.
+8. Escalate one profile only if diagnostics show ambiguity, coupling, or risk.
 ```
 
-The acceptance criteria do not change. The workflow reduces avoidable work by narrowing context, implementation, and verification to the evidence-supported surface.
+The acceptance criteria do not change. The workflow reduces avoidable work by narrowing model capability, context, implementation, and verification to the evidence-supported surface.
 
 ## Model Routing Overview
 
 TEMO Efficiency scores five dimensions from 0–2: complexity, risk, scope, verification burden, and uncertainty. The total selects a generic capability profile, not a hardcoded model brand.
 
-| Score | Profile | Use it for | Example checkpoints |
+| Score | Profile | Default level | Use it for |
 |---:|---|---|---|
-| 0–2 | **FAST** | Cheap, fast, deterministic work with a narrow surface and obvious verification | Rename one documented key; update fixed text; run a syntax or exact-value check |
-| 3–5 | **BALANCED** | Focused implementation and normal debugging with a known target | Fix a localized UI state bug; add a bounded API validation path; run targeted tests |
-| 6–8 | **DEEP** | Difficult regressions, architecture reasoning, or several coupled components | Trace a failure across client, service, and cache; design a compatible migration step |
-| 9–10 | **MAX** | Exceptional complexity or high security, data, infrastructure, or production risk | Review an authorization-boundary redesign; plan a high-blast-radius recovery |
+| 0–2 | **FAST** | Low | Cheap, fast, deterministic work with a narrow surface and obvious verification |
+| 3–5 | **BALANCED** | Medium | Focused implementation and normal debugging with a known target |
+| 6–8 | **DEEP** | Medium / High | Difficult regressions, architecture reasoning, or several coupled components |
+| 9–10 | **MAX** | High | Exceptional complexity or high security, data, infrastructure, or production risk |
 
 Configure each profile to the smallest model in your environment that can reliably satisfy its checkpoints. Move through `FAST → BALANCED → DEEP → MAX` one step at a time, carrying forward useful diagnostics and completed work.
 
 ## How the Workflow Protects Quality
 
 - Acceptance criteria remain fixed; efficiency never means accepting less.
+- The user sees the recommended model and level before execution starts.
 - Large jobs become micro-checkpoints with one primary objective and a stop condition.
 - Targeted tests fit narrow changes; broader regressions remain required when shared contracts, schemas, routing, security boundaries, or deployment foundations change.
 - Important fixes receive a small permanent regression guard when practical.
@@ -89,20 +113,20 @@ Use the reusable protocol and table in [`docs/BENCHMARK.md`](docs/BENCHMARK.md),
 
 ## Micro-Checkpoint Anatomy
 
-A checkpoint states the tool/environment, profile, effort, objective, protected PASS state, verification, success condition, stop condition, deployment permission, and final report shape. Use [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md) and prepend [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) only when execution is intended.
+A checkpoint states the tool/environment, profile, effort, objective, protected PASS state, verification, success condition, stop condition, deployment permission, and final report shape. Use [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md) first, then [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md), and prepend [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) only when execution is intended.
 
 ```text
-Tool/environment: <agent and environment>
-Model/Profile: <FAST | BALANCED | DEEP | MAX>
-Effort: <Low | Medium | High>
+EXECUTION CHOICE
+Tool / Environment: <agent and environment>
+Model: <exact available model or mapped profile model>
+Profile: <FAST | BALANCED | DEEP | MAX>
+Level / Effort: <Low | Medium | High>
+Boost / Speed: OFF unless justified
+Consumption: <lowest practical setting>
 Deploy: NO unless explicitly authorized
+Reason: <why this is sufficient>
 
-Objective: <one bounded result>
-Protected / do not repeat: <known PASS state>
-Verification: <targeted evidence and any protected tests>
-Escalation condition: <specific diagnostic threshold>
-Success condition: <acceptance evidence>
-Stop condition: report and do not expand scope
+Then copy and execute the command below.
 ```
 
 ## Regression Lock
@@ -122,7 +146,9 @@ Copy [`config/model-ladder.example.yaml`](config/model-ladder.example.yaml) and 
 ## Documentation
 
 - [`SKILL.md`](SKILL.md) — normative behavior and routing rules
-- [`examples/EXAMPLES.md`](examples/EXAMPLES.md) — four practical routing scenarios
+- [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md) — mandatory user-facing model + level selection before execution
+- [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md) — micro-checkpoint execution contract
+- [`examples/EXAMPLES.md`](examples/EXAMPLES.md) — practical routing scenarios
 - [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — measurement protocol and reusable dataset template
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — current foundation and planned candidates
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution guidance
@@ -134,7 +160,7 @@ TEMO Efficiency does not circumvent quotas, billing, plan restrictions, rate lim
 
 ## Origin
 
-TEMO Efficiency was developed through iterative real-project work under the **TEMO × AREEN** collaboration method: split the work, choose the capability each checkpoint deserves, verify precisely, and preserve what already passed.
+TEMO Efficiency was developed through iterative real-project work under the **TEMO × AREEN** collaboration method: split the work, choose the capability each checkpoint deserves, show the execution choice clearly, verify precisely, and preserve what already passed.
 
 ## Contributing
 
@@ -143,4 +169,3 @@ Real workflow reports are especially useful: where routing was correct or wrong,
 ## License
 
 MIT — use it, adapt it, and improve it.
-
