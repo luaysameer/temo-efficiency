@@ -6,6 +6,9 @@
   "observability": {
     "enabled": true
   },
+  "assets": {
+    "directory": "./public"
+  },
   "vars": {
     "GITHUB_OWNER": "luaysameer",
     "GITHUB_REPO": "temo-efficiency",
