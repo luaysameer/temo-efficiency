@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "source": "temo-efficiency",
+  "consent": true,
+  "feedbackMode": "ASK_BEFORE_SEND",
+  "clientId": "example-client-9f7c2d31",
+  "language": "ar",
+  "providerTool": "Example AI",
+  "temoVersion": "1.5.0",
+  "signalCode": "REPEATED_MISUNDERSTANDING",
+  "confidence": "HIGH",
+  "retryCount": 3,
+  "result": "PARTIAL",
+  "taskType": "provider/model discovery",
+  "catalogStatus": "UNKNOWN",
+  "initialRoute": "CURRENT_MODEL_ONLY",
+  "escalation": "none",
+  "missedContract": "The agent should request screenshots when the selectable model catalog cannot be verified.",
+  "whatHappened": "The same requirement was explained three times, but the agent continued assuming model names instead of asking for the actual picker.",
+  "expectedBehavior": "After the catalog could not be verified, request a screenshot or exact pasted list once and stop guessing model names.",
+  "likelyCause": "Catalog confidence gate was not applied before model ladder construction.",
+  "suggestedImprovement": "Trigger screenshot fallback immediately when the live model picker is unavailable."
+}
