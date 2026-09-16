@@ -11,6 +11,28 @@
 
 إذا كانت هذه الفكرة مفيدة لعملك، **[ضع Star للمشروع](https://github.com/luaysameer/temo-efficiency)** وشارك نتيجة تجربة حقيقية.
 
+## الجديد: الاختيار يظهر قبل التنفيذ
+
+قبل أي أمر تنفيذي، يجب على TEMO Efficiency أن يكتب للمستخدم اختيار التنفيذ بوضوح بدل تركه يخمّن أي موديل أو مستوى يحتاج:
+
+```text
+EXECUTION CHOICE
+Tool / Environment: Codex Local
+Model: <اسم الموديل المتاح أو الموديل المرتبط بالـProfile>
+Profile: FAST
+Level / Effort: Low
+Boost / Speed: OFF
+Consumption: Low
+Deploy: NO
+Reason: المهمة الحالية فحص محدد وحتمي ولا تحتاج موديل أثقل.
+
+Then copy and execute the command below.
+```
+
+إذا كانت أسماء الموديلات معروفة في البيئة، تختار المهارة للمستخدم مباشرة. وإذا لم تكن معروفة، تحدد الـProfile والـLevel المطلوبين من دون اختراع اسم موديل. عند الحاجة للتصعيد، تظهر بطاقة اختيار جديدة قبل الأمر التالي مع الحفاظ على كل حالات PASS السابقة.
+
+القالب المستقل موجود في [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md).
+
 ## البدء السريع
 
 1. حمّل [`SKILL.md`](SKILL.md) في مجلد المهارات لدى الـAgent، أو الصقه ضمن تعليمات المشروع في تدفق GPT/Codex.
@@ -19,6 +41,8 @@
 
 ```text
 Use the TEMO Efficiency rules in SKILL.md for this task.
+Before every execution command, show me the recommended Tool / Model / Profile / Level / Boost / Consumption / Deploy choice and one short reason.
+Choose for me when the environment is known; do not make me guess the model or level.
 Score the current task, choose FAST / BALANCED / DEEP / MAX, and explain the route.
 Create and execute one narrow micro-checkpoint. Preserve existing acceptance criteria and previous PASS states.
 Run verification proportional to the change surface, add a regression guard when practical, and escalate only when diagnostics justify it.
@@ -37,6 +61,7 @@ Protected / do not change: <state known PASS areas or scope limits>
 
 ```text
 - إرسال كل مهمة إلى أقوى موديل.
+- ترك المستخدم يخمّن أي Model وأي Level يحتاج.
 - توسيع النطاق ليشمل المشروع كله.
 - إعادة جميع الاختبارات بعد كل محاولة.
 - تكرار الـDebug في أجزاء لا تخص العطل.
@@ -47,32 +72,34 @@ Protected / do not change: <state known PASS areas or scope limits>
 
 ```text
 1. قياس التعقيد والمخاطرة والنطاق وصعوبة التحقق والغموض.
-2. اختيار FAST / BALANCED / DEEP / MAX.
-3. إنشاء Micro-Checkpoint ضيقة واحدة.
-4. تنفيذ تحقق مستهدف يناسب سطح التغيير.
-5. إضافة Regression Guard للعقد الذي انكسر عندما يكون ذلك عمليًا.
-6. حماية حالة PASS السابقة.
-7. التصعيد مستوى واحد فقط عندما تبرره نتائج التشخيص.
+2. إظهار Tool + Model + Profile + Level + Boost + Consumption + Deploy + Reason للمستخدم قبل التنفيذ.
+3. اختيار FAST / BALANCED / DEEP / MAX.
+4. إنشاء Micro-Checkpoint ضيقة واحدة.
+5. تنفيذ تحقق مستهدف يناسب سطح التغيير.
+6. إضافة Regression Guard للعقد الذي انكسر عندما يكون ذلك عمليًا.
+7. حماية حالة PASS السابقة.
+8. التصعيد مستوى واحد فقط عندما تبرره نتائج التشخيص.
 ```
 
-معايير القبول لا تتغير؛ الذي ينخفض هو العمل المتكرر وغير الضروري.
+معايير القبول لا تتغير؛ الذي ينخفض هو العمل المتكرر وغير الضروري وعدم وضوح إعداد التنفيذ.
 
 ## نظرة عامة على التوجيه
 
 يُقيَّم كل بُعد من 0 إلى 2: التعقيد، المخاطرة، النطاق، عبء التحقق، والغموض. المجموع يحدد Profile عامًّا لا اسم موديل ثابتًا.
 
-| الدرجة | Profile | مناسب لـ | مثال |
+| الدرجة | Profile | المستوى الافتراضي | مناسب لـ |
 |---:|---|---|---|
-| 0–2 | **FAST** | عمل حتمي صغير وسهل التحقق | تعديل نص ثابت، إعادة تسمية محدودة، فحص Syntax |
-| 3–5 | **BALANCED** | تنفيذ مركز وDebug اعتيادي بهدف معروف | إصلاح UI محلي، تحقق API محدود، Targeted Tests |
-| 6–8 | **DEEP** | Regression صعب أو عدة مكونات مترابطة أو قرار معماري | تتبع عطل بين Client وService وCache |
-| 9–10 | **MAX** | تعقيد استثنائي أو خطر عالٍ على الأمن أو البيانات أو الإنتاج | مراجعة حد صلاحيات أو خطة استعادة واسعة الأثر |
+| 0–2 | **FAST** | Low | عمل حتمي صغير وسهل التحقق |
+| 3–5 | **BALANCED** | Medium | تنفيذ مركز وDebug اعتيادي بهدف معروف |
+| 6–8 | **DEEP** | Medium / High | Regression صعب أو عدة مكونات مترابطة أو قرار معماري |
+| 9–10 | **MAX** | High | تعقيد استثنائي أو خطر عالٍ على الأمن أو البيانات أو الإنتاج |
 
 اربط كل Profile بأصغر موديل في بيئتك يستطيع إنجاز العمل بثقة. يكون التصعيد تدريجيًا: `FAST → BALANCED → DEEP → MAX`، مع الاحتفاظ بالتشخيص والعمل المنجز.
 
 ## كيف يحافظ على الجودة؟
 
 - لا تتغير معايير القبول لتوفير الاستخدام.
+- يرى المستخدم الموديل والمستوى المقترحين قبل التنفيذ.
 - كل Micro-Checkpoint لها هدف واحد وحد توقف واضح.
 - الاختبارات المستهدفة مناسبة للتغيير الضيق؛ أما العقود المشتركة والمخططات والتوجيه وحدود الأمن وأساس النشر فتتطلب Regression أوسع.
 - نضيف أصغر Regression Guard عملي بعد الإصلاحات المهمة.
@@ -87,20 +114,20 @@ Protected / do not change: <state known PASS areas or scope limits>
 
 ## شكل Micro-Checkpoint
 
-يجب أن تحدد الأداة/البيئة، والـProfile، والجهد، والهدف، وحالة PASS المحمية، والتحقق، وشرط النجاح، وشرط التوقف، وإذن النشر، وشكل التقرير. استخدم [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md)، وأضف [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) فقط عندما يكون المطلوب تنفيذًا فعليًا.
+ابدأ أولاً بـ[`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md)، ثم استخدم [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md)، وأضف [`templates/EXECUTION_HEADER.md`](templates/EXECUTION_HEADER.md) فقط عندما يكون المطلوب تنفيذًا فعليًا.
 
 ```text
-Tool/environment: <agent and environment>
-Model/Profile: <FAST | BALANCED | DEEP | MAX>
-Effort: <Low | Medium | High>
+EXECUTION CHOICE
+Tool / Environment: <agent and environment>
+Model: <exact available model or mapped profile model>
+Profile: <FAST | BALANCED | DEEP | MAX>
+Level / Effort: <Low | Medium | High>
+Boost / Speed: OFF unless justified
+Consumption: <lowest practical setting>
 Deploy: NO unless explicitly authorized
+Reason: <why this is sufficient>
 
-Objective: <one bounded result>
-Protected / do not repeat: <known PASS state>
-Verification: <targeted evidence and protected tests>
-Escalation condition: <specific diagnostic threshold>
-Success condition: <acceptance evidence>
-Stop condition: report and do not expand scope
+Then copy and execute the command below.
 ```
 
 ## Regression Lock
@@ -114,7 +141,9 @@ Stop condition: report and do not expand scope
 ## المستندات والمشاركة
 
 - [`SKILL.md`](SKILL.md) — القواعد الأساسية الملزمة
-- [`examples/EXAMPLES.md`](examples/EXAMPLES.md) — أربع حالات توجيه عملية
+- [`templates/EXECUTION_CHOICE.md`](templates/EXECUTION_CHOICE.md) — اختيار الموديل والمستوى قبل كل تنفيذ
+- [`templates/CHECKPOINT.md`](templates/CHECKPOINT.md) — عقد الـMicro-Checkpoint
+- [`examples/EXAMPLES.md`](examples/EXAMPLES.md) — حالات توجيه عملية
 - [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — بروتوكول القياس وقالب البيانات
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — الأساس الحالي والخطط المرشحة
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — دليل المساهمة
@@ -125,4 +154,3 @@ Stop condition: report and do not expand scope
 ## الترخيص
 
 MIT — استخدمها وعدلها وطورها.
-
