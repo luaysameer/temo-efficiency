@@ -14,7 +14,8 @@
 
   <div class="card">
     <span class="badge">Production test</span>
-    <p><strong>Important:</strong> “Create test Issue” creates one real GitHub Issue in <code>luaysameer/temo-efficiency</code>. The duplicate test should reuse that same Issue.</p>
+    <p><strong>Important:</strong> “Create test Issue” creates one real GitHub Issue in <code>luaysameer/temo-efficiency</code>. The duplicate test must reuse that same Issue. Reload this page to start a fresh fingerprint test run.</p>
+    <p class="muted">Run: <code id="runId"></code></p>
   </div>
 
   <div class="card row">
@@ -36,6 +37,8 @@
 const out=document.getElementById('out');
 const statusEl=document.getElementById('status');
 const clientId=localStorage.temoFeedbackTestClient||(localStorage.temoFeedbackTestClient='browser-test-'+crypto.randomUUID());
+const runId=crypto.randomUUID();
+document.getElementById('runId').textContent=runId;
 const basePayload={
   schemaVersion:'1.0',
   source:'temo-efficiency',
@@ -54,8 +57,8 @@ const basePayload={
   initialRoute:'N/A',
   escalation:'none',
   missedContract:'',
-  whatHappened:'Production browser acceptance test submitted structured feedback through TEMO Feedback Gateway.',
-  expectedBehavior:'Create exactly one structured GitHub Issue and reuse it for an identical duplicate submission.',
+  whatHappened:'Production browser acceptance test submitted structured feedback through TEMO Feedback Gateway. Test run '+runId+'.',
+  expectedBehavior:'Create exactly one structured GitHub Issue and reuse it for an identical duplicate submission in test run '+runId+'.',
   likelyCause:'N/A',
   suggestedImprovement:'N/A'
 };
