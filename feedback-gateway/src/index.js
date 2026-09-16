@@ -81,6 +81,7 @@ export default {
       if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/api/health")) {
         return json({
           ok: true,
+          ready: Boolean(env.GITHUB_TOKEN),
           service: "TEMO Feedback Gateway",
           version: env.GATEWAY_VERSION || "0.1.0",
           target: `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`,
@@ -96,6 +97,10 @@ export default {
 
       if (request.method !== "POST" || url.pathname !== "/v1/feedback") {
         return json({ ok: false, error: "not_found" }, 404);
+      }
+
+      if (!env.GITHUB_TOKEN) {
+        return json({ ok: false, error: "github_transport_not_configured" }, 503);
       }
 
       const contentType = request.headers.get("content-type") || "";
