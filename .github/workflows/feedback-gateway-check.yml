@@ -1,0 +1,42 @@
+name: TEMO Feedback Gateway Check
+
+on:
+  push:
+    paths:
+      - "feedback-gateway/**"
+      - ".github/workflows/feedback-gateway-check.yml"
+  pull_request:
+    paths:
+      - "feedback-gateway/**"
+      - ".github/workflows/feedback-gateway-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: JavaScript syntax check
+        run: node --check feedback-gateway/src/index.js
+
+      - name: Install Wrangler
+        working-directory: feedback-gateway
+        run: npm install --ignore-scripts
+
+      - name: Provide CI-only local secret placeholder
+        working-directory: feedback-gateway
+        run: printf 'GITHUB_TOKEN="ci-placeholder-not-real"\n' > .dev.vars
+
+      - name: Wrangler dry run
+        working-directory: feedback-gateway
+        run: npm run check
