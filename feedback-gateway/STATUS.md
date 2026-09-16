@@ -1,6 +1,6 @@
 # TEMO Feedback Gateway Status
 
-Current state: **DEPLOYED — HEALTH_PASS — SECRET_READY — LIVE_TEST_PENDING**
+Current state: **DEPLOYED — LIVE_ACCEPTANCE_PASS — NOTIFICATION_PENDING**
 
 Gateway version: `0.1.0`
 Production URL: `https://temo-feedback-gateway.cpu2turn.workers.dev`
@@ -11,15 +11,16 @@ Target repository: `luaysameer/temo-efficiency`
 
 - Worker deployment succeeded from `main`.
 - Production workers.dev URL is enabled.
-- `GET /api/health` returns `ok: true`.
-- Cloudflare secret `GITHUB_TOKEN` is configured and the health endpoint reports `ready: true`.
-- Health response reports:
-  - service: `TEMO Feedback Gateway`
-  - version: `0.1.0`
-  - target: `luaysameer/temo-efficiency`
-  - endpoint: `/v1/feedback`
-  - transport: `GitHub Issues`
-- Browser acceptance console is live at `/test.html` and renders the six acceptance-test actions.
+- `GET /api/health` returns `ok: true` and `ready: true`.
+- Cloudflare secret `GITHUB_TOKEN` is configured.
+- Browser acceptance console is live at `/test.html`.
+- `GET /v1/schema` returns schema `1.0` and the expected privacy contract.
+- A valid structured browser test created GitHub Issue `#3` with fingerprint `TFG-DB56C38CCCA1`.
+- Repeating the identical payload returned the same Issue with `duplicate: true` and HTTP 200; no second Issue was created.
+- An unsupported `rawConversation` field was rejected with HTTP 400 and `unsupported_field:rawConversation`.
+- `consent: false` was rejected with HTTP 400 and `consent_must_be_true`.
+- Issue `#3` was inspected directly and contains only structured feedback fields; no raw conversation, code, logs, files, screenshots, email, or token value is present.
+- Source review confirms the GitHub credential is referenced only through the runtime secret binding `env.GITHUB_TOKEN`; the token value is not stored in repository source or returned by the gateway responses.
 
 ## Implemented
 
@@ -41,27 +42,27 @@ Target repository: `luaysameer/temo-efficiency`
 
 ## Current checkpoint
 
-The gateway is deployed, secret-ready, and the browser test console is live. Live API acceptance testing remains before the endpoint is published as the canonical feedback transport inside `SKILL.md` and `TEMO_PORTABLE.md`.
+The production gateway has passed the live API acceptance checks. One final operational acceptance check remains: confirm that the maintainer receives the expected GitHub notification according to repository notification settings.
 
 ## Not yet ACTIVE
 
-Do not add the production gateway URL to `SKILL.md` or `TEMO_PORTABLE.md` until all live acceptance checks pass.
+Do not add the production gateway URL to `SKILL.md` or `TEMO_PORTABLE.md` until the notification check also passes.
 
 ## Activation acceptance checks
 
 1. Worker deploy succeeds. — PASS
 2. `GET /api/health` returns `ok: true` and `ready: true`. — PASS
 3. Browser acceptance console `/test.html` renders. — PASS
-4. `GET /v1/schema` returns schema `1.0`.
-5. Valid test payload creates exactly one GitHub Issue.
-6. Repeating the same payload returns the existing Issue (`duplicate: true`).
-7. `rawConversation` is rejected with HTTP 400.
-8. `consent: false` is rejected with HTTP 400.
-9. GitHub token is not present in source, responses, logs, or Issue body.
-10. Created Issue contains only structured/redacted feedback.
-11. Maintainer receives the expected GitHub notification according to repository notification settings.
+4. `GET /v1/schema` returns schema `1.0`. — PASS
+5. Valid test payload creates exactly one GitHub Issue. — PASS (`#3`)
+6. Repeating the same payload returns the existing Issue (`duplicate: true`). — PASS
+7. `rawConversation` is rejected with HTTP 400. — PASS
+8. `consent: false` is rejected with HTTP 400. — PASS
+9. GitHub token is not present in repository source, gateway responses, or Issue body; runtime code does not log the token value. — PASS
+10. Created Issue contains only structured/redacted feedback. — PASS
+11. Maintainer receives the expected GitHub notification according to repository notification settings. — PENDING USER CONFIRMATION
 
-After all checks PASS, update this file to:
+After check 11 passes, update this file to:
 
 `ACTIVE — LOCKED_PASS`
 
