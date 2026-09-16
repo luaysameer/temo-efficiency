@@ -12,9 +12,6 @@
     "GATEWAY_VERSION": "0.1.0",
     "MAX_DAILY_ISSUES": "100"
   },
-  "secrets": {
-    "required": ["GITHUB_TOKEN"]
-  },
   "ratelimits": [
     {
       "name": "CLIENT_RATE_LIMITER",
