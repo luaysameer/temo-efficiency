@@ -2,7 +2,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/luaysameer/temo-efficiency?style=social)](https://github.com/luaysameer/temo-efficiency/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![TEMO Efficiency](https://img.shields.io/badge/TEMO%20Efficiency-v1.5.0-blue.svg)](TEMO_LATEST.md)
+[![TEMO Efficiency](https://img.shields.io/badge/TEMO%20Efficiency-v1.6.0-blue.svg)](TEMO_LATEST.md)
 
 **TEMO Efficiency** مهارة لاختيار **الأداة + الموديل + مستوى التفكير المناسب قبل التنفيذ**، بدل استخدام أقوى موديل دائماً أو ترك المستخدم يخمّن شنو يختار.
 
@@ -194,6 +194,21 @@ Use the attached TEMO_PORTABLE.md as the TEMO Efficiency behavior contract for t
 
 ---
 
+## خريطة OpenAI الاقتصادية الجاهزة
+
+لحساب ChatGPT Work/Codex الذي تم التحقق من خياراته بتاريخ 2026-10-01:
+
+| الشغل | الاختيار |
+|---|---|
+| يومي وبحث وتعديلات حتمية | **GPT-6 Luna · Medium · Standard** |
+| بناء وبرمجة وتصميم اعتيادي | **GPT-6.1 Sol · Medium · Standard** |
+| أنظمة مترابطة وDebug صعب | **GPT-6.1 Sol · High · Standard** |
+| عائق استثنائي أو مراجعة نهائية | **GPT-6 Astra · High · Standard** |
+
+القاعدة: **Standard افتراضياً**؛ Fast/Turbo للوقت المستعجل فقط، مو لزيادة جودة التفكير. مشروع كامل ما يبقى على Astra—كل Checkpoint تختار إلها أصغر مستوى كافي.
+
+شوف [دليل OpenAI Work/Codex ومثال Mega X ReBurn](docs/OPENAI_WORK_CODEX_ROUTING.md).
+
 ## نظام التوجيه
 
 TEMO تقيم **الـCheckpoint الحالية**، مو أهمية المشروع كله.
@@ -263,7 +278,7 @@ diagnose → fix → targeted test → regression guard → real acceptance → 
 
 ## أهم الملفات
 
-- [`SKILL.md`](SKILL.md) — القواعد الرسمية، **v1.5.0**
+- [`SKILL.md`](SKILL.md) — القواعد الرسمية، **v1.6.0**
 - [`TEMO_LATEST.md`](TEMO_LATEST.md) — آخر نسخة منشورة
 - [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — Startup + Update + Fallback
 - [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) — ملف واحد Self-contained
