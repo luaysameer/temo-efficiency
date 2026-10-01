@@ -1,7 +1,7 @@
 ---
 name: temo-efficiency
 description: Provider-aware model and reasoning-level routing for AI workflows. Discovers the real provider/catalog, chooses the smallest capable model/level, shows the execution choice before every command, protects verified work, refreshes canonical rules, and learns from opt-in evidence-based feedback.
-version: 1.5.0
+version: 1.6.0
 license: MIT
 ---
 
@@ -123,6 +123,14 @@ CATALOG CONFIDENCE: VERIFIED
 Reuse this mapping for the session.
 
 Do not ask again unless the provider, account/product surface, tier, model catalog, or environment changes, or the first capture was incomplete.
+
+### 4.1 Optional verified account presets
+
+A dated provider/account preset may be loaded only when its catalog matches the user's current visible surface. A preset must record its verification date, default speed, exact models, exact reasoning levels, and a stale-on-change rule.
+
+For the maintainer's verified OpenAI Work/Codex surface, see `config/openai-work-codex-2026-10.yaml` and `docs/OPENAI_WORK_CODEX_ROUTING.md`.
+
+Speed is a separate cost/latency decision: default to **Standard**. Fast/Turbo should be selected only when latency is the real blocker; it must not be treated as extra reasoning quality. Route each checkpoint independently and return to Standard after the urgent checkpoint.
 
 ## 5. Score the current checkpoint
 

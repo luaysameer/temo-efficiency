@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6.0 — OpenAI cost-aware routing & Mega X ReBurn trial
+
+### Added
+
+- Dated, user-verified ChatGPT Work/Codex ladder for GPT-6 Luna, GPT-6.1 Sol, and GPT-6 Astra.
+- Explicit Standard-vs-Fast/Turbo rule: speed controls latency/cost, not reasoning quality.
+- Ready-to-run Mega X ReBurn checkpoint map and first implementation command.
+- Machine-readable OpenAI routing preset.
+
+### Changed
+
+- Route every checkpoint independently; Astra is an escalation lane, not a permanent project default.
+- Updated Arabic and English quick-start guidance and version manifest.
+
 ## 1.5.0 — Provider-aware routing, portable bootstrap, auto-refresh & feedback
 
 Major evolution of TEMO Efficiency from a model-routing workflow into a provider-aware execution behavior contract.
