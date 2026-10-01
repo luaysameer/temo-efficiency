@@ -1,0 +1,36 @@
+# Verified user/account preset — 2026-10-01
+# Re-run provider discovery when the visible ChatGPT Work/Codex picker changes.
+provider: openai
+surface: chatgpt-work-codex
+catalog_status: verified_for_user_surface
+verified_on: 2026-10-01
+default_speed: Standard
+
+profiles:
+  fast:
+    model: GPT-6 Luna
+    reasoning: Medium
+    speed: Standard
+    use_for: [search, summaries, inventory, deterministic_edits]
+  balanced:
+    model: GPT-6.1 Sol
+    reasoning: Medium
+    speed: Standard
+    use_for: [normal_implementation, ui_work, multi_file_changes, routine_debugging]
+  deep:
+    model: GPT-6.1 Sol
+    reasoning: High
+    speed: Standard
+    use_for: [architecture, coupled_systems, difficult_debugging, game_mechanics]
+  max:
+    model: GPT-6 Astra
+    reasoning: High
+    speed: Standard
+    use_for: [novel_blockers, milestone_review, exceptional_reasoning]
+
+policy:
+  route_current_checkpoint: true
+  escalate_one_step_only: true
+  fast_or_turbo_only_when_latency_is_blocker: true
+  return_to_standard_after_checkpoint: true
+  preserve_locked_pass: true
