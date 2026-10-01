@@ -2,7 +2,7 @@
 
 Canonical repository: `luaysameer/temo-efficiency`
 
-Current skill version: **1.5.0**
+Current skill version: **1.6.0**
 Current portable contract: **1.3**
 
 ## Canonical entrypoints
@@ -17,6 +17,8 @@ Current portable contract: **1.3**
 - Feedback loop: `docs/FEEDBACK_LOOP.md`
 - Cross-device test: `docs/CROSS_DEVICE_TEST.md`
 - Contribution guide: `CONTRIBUTING.md`
+- OpenAI Work/Codex routing: `docs/OPENAI_WORK_CODEX_ROUTING.md`
+- Verified OpenAI preset: `config/openai-work-codex-2026-10.yaml`
 
 ## Session update rule
 
