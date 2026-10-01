@@ -2,7 +2,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/luaysameer/temo-efficiency?style=social)](https://github.com/luaysameer/temo-efficiency/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![TEMO Efficiency](https://img.shields.io/badge/TEMO%20Efficiency-v1.5.0-blue.svg)](TEMO_LATEST.md)
+[![TEMO Efficiency](https://img.shields.io/badge/TEMO%20Efficiency-v1.6.0-blue.svg)](TEMO_LATEST.md)
 
 **Provider-aware model + reasoning-level routing for AI execution workflows.**
 
@@ -275,7 +275,7 @@ It covers:
 
 ## Key files
 
-- [`SKILL.md`](SKILL.md) — normative skill behavior, **v1.5.0**
+- [`SKILL.md`](SKILL.md) — normative skill behavior, **v1.6.0**
 - [`TEMO_LATEST.md`](TEMO_LATEST.md) — current-version manifest
 - [`TEMO_BOOTSTRAP.md`](TEMO_BOOTSTRAP.md) — startup/update/fallback flow
 - [`TEMO_PORTABLE.md`](TEMO_PORTABLE.md) — self-contained portable contract
@@ -303,3 +303,10 @@ The purpose is to reduce **avoidable AI work** while preserving the required qua
 ## License
 
 MIT — use it, test it, adapt it, and improve it.
+
+## Ready-to-use OpenAI routing preset
+
+For the maintainer's verified ChatGPT Work/Codex surface (2026-10-01): Luna handles bounded chores, GPT-6.1 Sol Medium is the default implementation lane, GPT-6.1 Sol High handles difficult coupled work, and Astra High is reserved for exceptional blockers or milestone review. Standard speed is the cost-aware default.
+
+See the [OpenAI Work/Codex routing guide and Mega X ReBurn example](docs/OPENAI_WORK_CODEX_ROUTING.md).
+
